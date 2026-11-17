@@ -8,21 +8,77 @@
 
 ---
 
-## 1. Nomenclature Matérielle Réelle (BOM) & Montage Sommet du Grip ($s = 0$)
+## 1. Nomenclature Matérielle Complète (BOM) & Modélisation Mécanique 3D (CAO)
 
-### 1.1 Liste des Composants Matériels du Capteur GeoTrick IMU
-| Référence / Code | Composant | Rôle et Caractéristiques Physiques |
-| :--- | :--- | :--- |
-| **`102010469` (Code 37557)** | **Carte Seeed Studio XIAO BLE nRF52840 Sense** | MCU Nordic `nRF52840` (ARM Cortex-M4F $64\text{ MHz}$, $1\text{ Mo}$ Flash, $256\text{ Ko}$ RAM, BLE 5.0 2M PHY) + IMU 6-DoF **`LSM6DS3TR-C`** ($\pm 16\,g$, $\pm 2000^\circ/\text{s}$, jusqu'à $1.66\text{ kHz}$) + Micro numérique PDM **`MP34DT05-A`** + Chargeur LiPo `BQ25101` ($21 \times 17.5\text{ mm}$, $2.0\text{ g}$). |
-| **`L301525` (Code 09958)** | **Accu LiPo $3,7\text{ V } 85\text{ mAh}$** | Dimensions $30 \times 15 \times 2.5\text{ mm}$ ($\sim 2.2\text{ g}$), soudé sur les pads `BAT+` / `BAT-` au dos de la XIAO, rechargé par le port USB-C de la XIAO. |
-| **`ESP101` (Code 07179)** | **Inverseur unipolaire miniature ON-ON** | Coupure physique maître de la ligne `BAT+` pour le transport longue durée ($500\text{ mA} / 12\text{ Vcc}$, $0.8\text{ g}$). |
-| **`FC25J` / `FC25V` + `FTK01`** | **Fils souples $0,20\text{ mm}^2$ & Gaine thermo** | Câblage interne batterie/interrupteur et réalisation des ponts de codage binaire 4 bits (`D0..D3` vers `GND`) dans chaque embase de club. |
+### 1.1 Partie A — Composants Électroniques Déjà Achetés (Commande Initiale)
+| Référence / Code | Composant | Qté | Rôle et Caractéristiques Physiques |
+| :--- | :--- | :--- | :--- |
+| **`102010469` (Code 37557)** | **Carte Seeed Studio XIAO BLE nRF52840 Sense** | 1 | MCU Nordic `nRF52840` ($64\text{ MHz}$, $256\text{ Ko}$ RAM, BLE 5.0) + IMU 6-DoF **`LSM6DS3TR-C`** ($\pm 16\,g$, $\pm 2000^\circ/\text{s}$, $1.66\text{ kHz}$) + Micro PDM **`MP34DT05-A`** + Chargeur LiPo `BQ25101` ($21 \times 17.5\text{ mm}$, $2.0\text{ g}$). |
+| **`L301525` (Code 09958)** | **Accu LiPo $3,7\text{ V } 85\text{ mAh}$** | 1 | Dimensions $30 \times 15 \times 2.5\text{ mm}$ ($\sim 2.2\text{ g}$), soudé sur les pads `BAT+` / `BAT-` au dos de la XIAO, rechargé par le port USB-C de la XIAO ($50\text{ mA}$). |
+| **`ESP101` (Code 07179)** | **Inverseur unipolaire miniature ON-ON** | 1 | Coupure physique maître de la ligne `BAT+` pour le stockage longue durée ($500\text{ mA} / 12\text{ Vcc}$, $0.8\text{ g}$). |
+| **`FC25J` / `FC25V` + `FTK01`** | **Fils souples $0,20\text{ mm}^2$ & Gaine thermo** | 2 + 1 | Câblage interne batterie/interrupteur et réalisation des ponts de codage binaire 4 bits (`D0..D3` vers `GND`) au dos de chaque embase de club. |
+| **`CS18` + `ESP002/50` + `ECU02` + `HT222`** | **Outillage de soudure Antex 18W, étain $0,5\text{ mm}$, tresse, pince** | 1 lot | Poste d'assemblage de précision pour les pads CMS de la XIAO et des connecteurs Pogo-Pin. |
 
-> [!TIP]
-> **Recommandation d'ajout matériel ($< 10\text{ €}$) pour fiabiliser les 14 embases :**
-> Afin d'éviter toute usure ou faux contact des fils lors des clipsages répétés entre clubs, il est recommandé d'utiliser un **connecteur à pistons dorés sur ressort (*Pogo Pins* 5 broches à pas de $2.0\text{ mm}$ ou $2.54\text{ mm}$)** :
-> - **1 barrette mâle 5 Pogo Pins** montée sous le boîtier du capteur XIAO (reliée à `D0`, `D1`, `D2`, `D3`, `GND`).
-> - **14 cibles femelles (5 pastilles dorées planes)** intégrées dans les 14 embases de clubs, au dos desquelles vos fils souples `FC25J`/`FC25V` réalisent les ponts vers `GND`.
+### 1.2 Partie B — Composants Complémentaires à Acheter (Connectique Magnétique & Boîtier Qualitatif)
+| Référence Type | Composant à acheter | Qté | Justification Technique & Rôle |
+| :--- | :--- | :--- | :--- |
+| **`POGO-MAG-5P-2.54` (ou `2.0mm`)** | **Connecteur Magnétique Pogo-Pin 5 broches (1 Mâle à pistons + 14 Embases Femelles dorées)** | 1 Mâle + 14 Femelles | Assure la liaison électrique 5 fils (`D0, D1, D2, D3, GND`) avec placage magnétique néodyme N52 automatique. **Zéro perturbation sur l'IMU** car le `LSM6DS3TR-C` est un 6-DoF pur (sans magnétomètre). |
+| **`INS-M2-3X4` + `VIS-M2X6`** | **Inserts filetés laiton M2 à chaud + Vis M2 inox tête fraisée** | Lot de 10 | Fermeture rigide et démontable du boîtier capteur (capot supérieur sur socle inférieur) sans colle ni jeu mécanique. |
+| **`VHB-05MM` / `KAPTON-10MM`** | **Ruban adhésif double-face amortisseur 3M VHB ($0,5\text{ mm}$) + Ruban Kapton** | 1 rouleau | Isolation électrique entre le dos de la carte XIAO et la batterie LiPo `L301525` + absorption des micro-vibrations haute fréquence sur la batterie. |
+| **`EPOXY-2K` (ou Colle UV)** | **Résine époxy bi-composant (ou vernis de tropicalisation)** | 1 seringue | Noyage (potting) des ponts de fils `0,20 mm²` au dos des 14 connecteurs femelles dans les embases pour les rendre **100 % étanches (IP67)** et insensibles aux chocs. |
+| **`FIL-PETG-CF` (ou `PA12-SLS`)** | **Filament PETG chargé Fibre de Carbone (ou impression Nylon PA12 frittage laser SLS)** | 1 bobine / tirage | Matériau haute rigidité, mat, résistant aux UV et aux chocs pour le boîtier capteur et les 14 embases. |
+
+---
+
+## 1.3 Spécification CAO / Modélisation 3D Mécanique Qualitative (`Mechanical CAD Spec`)
+
+Afin d'obtenir un produit fini qualitatif, ergonomique et indestructible face aux accélérations de swing ($14\,g$ centripète + $>20\,g$ d'onde de choc d'impact), l'accouplement combine **l'attraction magnétique du connecteur Pogo-Pin 5 broches** (pour la pression de contact électrique) et **un emboîtement mécanique en « D » à baïonnette / ergot de retenue** (qui encaisse 100 % des efforts de cisaillement et de torsion).
+
+```mermaid
+flowchart TB
+    subgraph Capteur["Boîtier Capteur GeoTrick (Ø 32mm × H 11.5mm — ~10.4g)"]
+        TopCap["Capot Supérieur (PETG-CF / PA12) : Flèche de visée Face + Fenêtre LED"]
+        XIAO["Carte XIAO BLE nRF52840 Sense bridée sur 4 colonnettes rigides"]
+        Switch["Glissière encastrée (en retrait de 1mm) pour l'inverseur ESP101"]
+        LiPo["Berceau inférieur : Accu LiPo L301525 (30×15×2.5mm) sur mousse VHB"]
+        MalePogo["Semelle en D mâle + Connecteur Pogo-Pin Magnétique 5 pistons (D0..D3, GND)"]
+        TopCap --> XIAO --> LiPo --> MalePogo
+        Switch --- XIAO
+    end
+
+    subgraph Embase["Embase Club Permanente (Keyed Magnetic Butt-Cap Mount — ~3.2g)"]
+        FemPogo["Puits femelle en D (prof. 3.5mm) + Cible Magnétique 5 pastilles dorées"]
+        SolderPocket["Chambre arrière étanche (Epoxy) : Ponts de fil 0.20mm² (Code binaire 1..14)"]
+        Collar["Collerette d'appui sur grip (Ø 26mm) avec 3 picots anti-rotation + Flèche Leading Edge"]
+        Screw["Vis conique autotaraudeuse (Ø 4.5mm × L 18mm) vissée dans le trou d'évent du grip"]
+        FemPogo --> SolderPocket --> Collar --> Screw
+    end
+
+    MalePogo == "1. Attraction Magnétique N52 + 2. Verrouillage Mécanique en D" ==> FemPogo
+```
+
+### A. Modélisation 3D de l'Embase Club (`Keyed Magnetic Butt-Cap Mount` — 14 unités)
+1. **Tige filetée conique d'ancrage dans le grip (`Grip Vent Screw`)** :
+   - Tige centrale conique ($\varnothing 4.5\text{ mm}$ à la base $\rightarrow \varnothing 3.0\text{ mm}$ en pointe, longueur $18.0\text{ mm}$, filet large autotaraudeur pas $2.2\text{ mm}$) qui se visse sans outil (à la main) dans l'évent standard de tout grip de golf.
+2. **Collerette d'assise anti-rotation (`Anti-Twist Flange`)** :
+   - Disque d'appui $\varnothing 26.0\text{ mm}$ dont la face inférieure comporte **3 ergots pyramidaux de $1.2\text{ mm}$** qui s'enfoncent dans l'élastomère du sommet du grip lors du serrage, rendant toute rotation accidentelle de l'embase impossible.
+   - Gravure laser / relief sur le bord supérieur : **Flèche `▲ FACE`** à aligner avec la rainure centrale du grip et le bord d'attaque (*leading edge*) de la face du club.
+3. **Puits de réception en « D » & Logement du Connecteur Magnétique Femelle** :
+   - Cavité supérieure en forme de **« D » asymétrique** ($\varnothing 18.0\text{ mm}$ avec méplat d'indexation à $7.0\text{ mm}$ du centre, profondeur $3.5\text{ mm}$) garantissant une erreur angulaire $\le \pm 0.15^\circ$.
+   - Deux micro-rainures latérales à bille/lèvre souple (*Snap-Fit Detent*) retiennent mécaniquement le capteur contre l'arrachement centrifuge en complément des aimants néodyme N52 du connecteur Pogo-Pin 5 broches.
+   - Au fond du puits, une chambre arrière de $2.0\text{ mm}$ accueille la soudure des ponts de fil `0,20 mm²` (`D0..D3` vers `GND`) noyée dans l'époxy, avec gravure du numéro d'embase (`#1` à `#14`) au fond du puits.
+
+### B. Modélisation 3D du Boîtier Capteur (`GeoTrick Sensor Pod Housing` — 1 unité)
+1. **Enveloppe géométrique & Équilibre des masses** :
+   - Forme de galet aérodynamique bas profil : **$\varnothing 32.0\text{ mm}$ (ou oblong $33 \times 22\text{ mm}$) $\times$ hauteur hors-tout $11.5\text{ mm}$**, bords chanfreinés à $45^\circ$ pour ne jamais gêner les mains ni s'accrocher dans le sac.
+2. **Couplage rigide de l'IMU `LSM6DS3TR-C` & Isolation de la batterie `L301525`** :
+   - La carte **XIAO BLE nRF52840 Sense** est plaquée directement sur 4 colonnettes rigides solidaires du socle en « D » et verrouillée par le capot supérieur (2 vis M2 dans inserts laiton) : **aucun jeu élastique entre l'embase et la carte XIAO**, ce qui garantit une transmission pure de l'onde de choc $\pm 16\,g$ et de la torsion $\Delta \omega_z$.
+   - L'accu LiPo `L301525` ($30 \times 15 \times 2.5\text{ mm}$) est logé dans un berceau indépendant sous la carte XIAO avec un tampon de mousse VHB $0.5\text{ mm}$, protégé de tout écrasement mécanique.
+   - Le microphone numérique PDM `MP34DT05-A` est placé en face d'un canal acoustique interne de $\varnothing 1.2\text{ mm}$ débouchant sur la semelle en contact avec l'embase pour capter la vibration solidienne du shaft.
+3. **Ergonomie Externe (USB-C, LED de charge & Interrupteur `ESP101` sécurisé)** :
+   - **Port USB-C accessible** sur le flanc arrière avec bouchon silicone imperdable.
+   - **Conduit optique translucide** au-dessus de la LED de charge de la XIAO.
+   - **Interrupteur `ESP101` encastré (*Flush Guard*)** : le levier de l'inverseur est logé dans une fenêtre en retrait de $1.2\text{ mm}$ afin qu'aucun contact de main ou de gant ne puisse l'éteindre en plein swing.
 
 ---
 
