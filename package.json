@@ -1,0 +1,11 @@
+{
+  "name": "kinetra",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Kinetra — Biomechanical & 3D Ballistic Golf Swing Analysis Platform (SDD)",
+  "type": "module",
+  "scripts": {
+    "test": "node --test src/sim-harness/sim-harness.test.ts",
+    "sim:verify": "node src/sim-harness/cli.ts"
+  }
+}

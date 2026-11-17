@@ -4,8 +4,8 @@
 
 **Blocked by:** None (can start immediately)
 
-**Status:** ready-for-agent
+**Status:** resolved
 
-- [ ] Validates all 7 schemas in `schemas/*.schema.json` and all 16 JSON files across the 4 reference scenarios in `fixtures/simulation/` (`REQ-ARCH-003`, `REQ-SIM-002`).
-- [ ] Rejects malformed payloads (e.g., invalid 4-bit GPIO mount code `1111` in a locked `ClubProfile`, out-of-range $\pm 16\,g$ accelerometer value, or invalid `charging_state`) with structured `ERR_SCHEMA_VALIDATION_FAILED` diagnostics (`REQ-API-001`).
-- [ ] Evaluates numerical tolerances between computed pipeline outputs and `expected_outcomes.json`, exiting with code `0` when all metrics are within tolerance and non-zero with a detailed diff report when any metric drifts beyond its bound (`REQ-SIM-001`, `REQ-SIM-003`).
+- [x] Validates all 7 schemas in `schemas/*.schema.json` and all 16 JSON files across the 4 reference scenarios in `fixtures/simulation/` (`REQ-ARCH-003`, `REQ-SIM-002`).
+- [x] Rejects malformed payloads (e.g., invalid 4-bit GPIO mount code `1111` in a locked `ClubProfile`, out-of-range $\pm 16\,g$ accelerometer value, or invalid `charging_state`) with structured `ERR_SCHEMA_VALIDATION_FAILED` diagnostics (`REQ-API-001`).
+- [x] Evaluates numerical tolerances between computed pipeline outputs and `expected_outcomes.json`, exiting with code `0` when all metrics are within tolerance and non-zero with a detailed diff report when any metric drifts beyond its bound (`REQ-SIM-001`, `REQ-SIM-003`).
