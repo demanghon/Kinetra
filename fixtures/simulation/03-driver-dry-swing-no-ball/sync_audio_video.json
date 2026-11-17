@@ -1,0 +1,38 @@
+{
+  "session_id": "sess-sim-03",
+  "topology_version": "v1_single_smartphone",
+  "primary_camera_role": "dtl",
+  "spatial_calibration_frame": {
+    "virtual_spirit_level_roll_deg": 0.1,
+    "virtual_spirit_level_pitch_deg": -0.4,
+    "camera_to_ball_distance_m": 2.6,
+    "camera_height_m": 1.0,
+    "ground_target_line_locked": true,
+    "calibration_valid": true
+  },
+  "camera_streams": [
+    {
+      "stream_id": "cam-primary-dtl",
+      "role": "dtl",
+      "fps": 60,
+      "shutter_speed_inv_s": 1000,
+      "resolution": "1920x1080"
+    }
+  ],
+  "impact_sync_anchor": {
+    "sync_method": "DRY_SWING_LOW_POINT_CORRELATION",
+    "imu_impact_timestamp_ms": 1500.0,
+    "audio_peak_raw_timestamp_ms": null,
+    "acoustic_tof_correction_ms": 0.0,
+    "aligned_sync_offset_ms": 18.0,
+    "sync_uncertainty_ms": 4.2
+  },
+  "dtl_launch_window": null,
+  "pose_kinematics_summary": {
+    "shoulder_turn_top_deg": 94.0,
+    "hip_turn_top_deg": 45.0,
+    "x_factor_top_deg": 49.0,
+    "pelvis_lateral_sway_cm": 2.8,
+    "swing_plane_angle_deg": 57.8
+  }
+}

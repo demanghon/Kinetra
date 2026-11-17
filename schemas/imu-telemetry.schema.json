@@ -1,0 +1,284 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://kinetra.golf/schemas/imu-telemetry.schema.json",
+  "title": "ImuTelemetryAndAnalysis",
+  "description": "Seeed XIAO BLE nRF52840 Sense (LSM6DS3TR-C 6-DoF + MP34DT05-A PDM Mic) butt-cap telemetry burst, 4-bit Auto-ID mount slot, Wake-on-Use power telemetry, ±16g Impact Clipping Signature, and Compensated Clubface Orientation.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "capture_id",
+    "sensor_hardware_model",
+    "sensor_firmware_version",
+    "mount_locked",
+    "detected_mount_slot_id",
+    "power_telemetry",
+    "address_pose_tare",
+    "raw_burst_1000hz",
+    "swing_event_classification",
+    "impact_clipping_signature",
+    "compensated_clubhead_at_impact"
+  ],
+  "properties": {
+    "capture_id": {
+      "type": "string"
+    },
+    "sensor_hardware_model": {
+      "type": "string",
+      "const": "XIAO_BLE_NRF52840_SENSE_LSM6DS3TRC"
+    },
+    "sensor_firmware_version": {
+      "type": "string"
+    },
+    "mount_locked": {
+      "type": "boolean",
+      "const": true,
+      "description": "Confirms the GeoTrick IMU is mechanically locked into the Keyed Butt-Cap Mount (GPIO D0..D3 != 1111)."
+    },
+    "detected_mount_slot_id": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 14,
+      "description": "Club slot automatically identified from the mount's 4-bit GPIO jumper."
+    },
+    "power_telemetry": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "battery_mv",
+        "battery_percent",
+        "usb_vbus_connected",
+        "charging_state",
+        "charge_current_limit_ma",
+        "estimated_minutes_to_full",
+        "estimated_remaining_play_hours",
+        "wake_source",
+        "ble_on_demand_active"
+      ],
+      "properties": {
+        "battery_mv": {
+          "type": "integer",
+          "minimum": 3000,
+          "maximum": 4250,
+          "description": "Voltage of the L301525 85mAh LiPo cell in millivolts."
+        },
+        "battery_percent": {
+          "type": "number",
+          "minimum": 0.0,
+          "maximum": 100.0
+        },
+        "usb_vbus_connected": {
+          "type": "boolean",
+          "description": "True when 5V USB-C power is detected by nRF52840 USBREGSTATUS.VBUSDETECT."
+        },
+        "charging_state": {
+          "type": "string",
+          "enum": [
+            "DISCHARGING",
+            "CHARGING_CC",
+            "CHARGING_CV",
+            "CHARGE_COMPLETE",
+            "SWITCH_OFF_DURING_CHARGE_WARNING"
+          ]
+        },
+        "charge_current_limit_ma": {
+          "type": "integer",
+          "const": 50,
+          "description": "BQ25101 charge current pinned to 50mA (P0.13 = HIGH) to protect the 85mAh LiPo cell."
+        },
+        "estimated_minutes_to_full": {
+          "type": ["integer", "null"],
+          "minimum": 0,
+          "maximum": 120
+        },
+        "estimated_remaining_play_hours": {
+          "type": ["number", "null"],
+          "minimum": 0.0,
+          "maximum": 40.0
+        },
+        "wake_source": {
+          "type": "string",
+          "enum": ["GPIOTE_MOUNT_INSERT", "LSM6DS3_INT1_MOTION", "USB_VBUS_PLUGGED"]
+        },
+        "ble_on_demand_active": {
+          "type": "boolean",
+          "const": true
+        }
+      }
+    },
+    "address_pose_tare": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["dwell_duration_ms", "tare_quaternion_wxyz", "residual_face_tare_deg"],
+      "properties": {
+        "dwell_duration_ms": {
+          "type": "number",
+          "minimum": 800.0
+        },
+        "tare_quaternion_wxyz": {
+          "type": "array",
+          "items": { "type": "number" },
+          "minItems": 4,
+          "maxItems": 4
+        },
+        "residual_face_tare_deg": {
+          "type": "number",
+          "minimum": -5.0,
+          "maximum": 5.0
+        }
+      }
+    },
+    "raw_burst_1000hz": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["sample_rate_hz", "accel_full_scale_g", "gyro_full_scale_dps", "samples"],
+      "properties": {
+        "sample_rate_hz": { "type": "integer", "const": 1000 },
+        "accel_full_scale_g": { "type": "number", "const": 16.0 },
+        "gyro_full_scale_dps": { "type": "number", "const": 2000.0 },
+        "samples": {
+          "type": "array",
+          "minItems": 5,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "t_rel_ms",
+              "accel_g_xyz",
+              "gyro_dps_xyz",
+              "pdm_mic_rms",
+              "accel_saturated_axes"
+            ],
+            "properties": {
+              "t_rel_ms": { "type": "number" },
+              "accel_g_xyz": {
+                "type": "array",
+                "items": { "type": "number", "minimum": -16.0, "maximum": 16.0 },
+                "minItems": 3,
+                "maxItems": 3
+              },
+              "gyro_dps_xyz": {
+                "type": "array",
+                "items": { "type": "number", "minimum": -2000.0, "maximum": 2000.0 },
+                "minItems": 3,
+                "maxItems": 3
+              },
+              "pdm_mic_rms": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 65535,
+                "description": "1ms RMS envelope from the onboard MP34DT05-A digital PDM microphone at the butt cap."
+              },
+              "accel_saturated_axes": {
+                "type": "array",
+                "items": { "type": "boolean" },
+                "minItems": 3,
+                "maxItems": 3
+              }
+            }
+          }
+        }
+      }
+    },
+    "swing_event_classification": {
+      "type": "string",
+      "enum": ["ball_strike", "dry_swing"]
+    },
+    "impact_clipping_signature": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "saturated_at_16g",
+        "pdm_mic_impact_confirmed",
+        "clipping_duration_ms",
+        "axial_gyro_twist_impulse_dps",
+        "ring_down_energy_g2_ms",
+        "estimated_horizontal_impact_mm",
+        "strike_zone",
+        "strike_quality_index"
+      ],
+      "properties": {
+        "saturated_at_16g": {
+          "type": "boolean",
+          "description": "True when the >=20g ball-strike shockwave clips the ±16g LSM6DS3TR-C accelerometer at the butt cap."
+        },
+        "pdm_mic_impact_confirmed": {
+          "type": "boolean",
+          "description": "True when the onboard MP34DT05-A PDM microphone detects the synchronous structure-borne impact peak."
+        },
+        "clipping_duration_ms": {
+          "type": "number",
+          "minimum": 0.0,
+          "maximum": 15.0
+        },
+        "axial_gyro_twist_impulse_dps": {
+          "type": "number",
+          "description": "Delta omega_z (deg/s) within 4ms post-impact: negative = toe strike opening torque, positive = heel strike torque, near-zero = center strike."
+        },
+        "ring_down_energy_g2_ms": {
+          "type": "number",
+          "minimum": 0.0
+        },
+        "estimated_horizontal_impact_mm": {
+          "type": "number",
+          "minimum": -35.0,
+          "maximum": 35.0,
+          "description": "Signed horizontal offset from sweet spot: negative = toe, 0 = center, positive = heel."
+        },
+        "strike_zone": {
+          "type": "string",
+          "enum": ["toe", "center", "heel", "none_dry_swing"]
+        },
+        "strike_quality_index": {
+          "type": "number",
+          "minimum": 0.0,
+          "maximum": 100.0
+        }
+      }
+    },
+    "compensated_clubhead_at_impact": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "clubhead_speed_mps",
+        "hand_speed_mps",
+        "club_path_deg",
+        "attack_angle_deg",
+        "raw_butt_face_angle_deg",
+        "shaft_deflection_state",
+        "compensated_face_angle_deg",
+        "compensated_dynamic_loft_deg",
+        "compensated_dynamic_lie_deg",
+        "tempo_backswing_to_downswing_ratio"
+      ],
+      "properties": {
+        "clubhead_speed_mps": { "type": "number", "minimum": 5.0, "maximum": 70.0 },
+        "hand_speed_mps": { "type": "number", "minimum": 2.0, "maximum": 20.0 },
+        "club_path_deg": { "type": "number", "minimum": -25.0, "maximum": 25.0 },
+        "attack_angle_deg": { "type": "number", "minimum": -20.0, "maximum": 15.0 },
+        "raw_butt_face_angle_deg": { "type": "number", "minimum": -30.0, "maximum": 30.0 },
+        "shaft_deflection_state": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "lead_deflection_mm",
+            "toe_down_droop_mm",
+            "dynamic_loft_addition_deg",
+            "torsional_twist_deg",
+            "kick_velocity_mps"
+          ],
+          "properties": {
+            "lead_deflection_mm": { "type": "number" },
+            "toe_down_droop_mm": { "type": "number" },
+            "dynamic_loft_addition_deg": { "type": "number" },
+            "torsional_twist_deg": { "type": "number" },
+            "kick_velocity_mps": { "type": "number" }
+          }
+        },
+        "compensated_face_angle_deg": { "type": "number", "minimum": -30.0, "maximum": 30.0 },
+        "compensated_dynamic_loft_deg": { "type": "number", "minimum": 2.0, "maximum": 70.0 },
+        "compensated_dynamic_lie_deg": { "type": "number", "minimum": 45.0, "maximum": 75.0 },
+        "tempo_backswing_to_downswing_ratio": { "type": "number", "minimum": 1.0, "maximum": 6.0 }
+      }
+    }
+  }
+}

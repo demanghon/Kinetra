@@ -1,0 +1,66 @@
+{
+  "capture_id": "cap-sim-04",
+  "sensor_hardware_model": "XIAO_BLE_NRF52840_SENSE_LSM6DS3TRC",
+  "sensor_firmware_version": "1.1.0-xiao-geotrick",
+  "mount_locked": true,
+  "detected_mount_slot_id": 4,
+  "power_telemetry": {
+    "battery_mv": 3850,
+    "battery_percent": 68.0,
+    "usb_vbus_connected": false,
+    "charging_state": "DISCHARGING",
+    "charge_current_limit_ma": 50,
+    "estimated_minutes_to_full": null,
+    "estimated_remaining_play_hours": 20.4,
+    "wake_source": "GPIOTE_MOUNT_INSERT",
+    "ble_on_demand_active": true
+  },
+  "address_pose_tare": {
+    "dwell_duration_ms": 880.0,
+    "tare_quaternion_wxyz": [0.99999, 0.0, 0.0, -0.00174],
+    "residual_face_tare_deg": -0.2
+  },
+  "raw_burst_1000hz": {
+    "sample_rate_hz": 1000,
+    "accel_full_scale_g": 16.0,
+    "gyro_full_scale_dps": 2000.0,
+    "samples": [
+      { "t_rel_ms": -800.0, "accel_g_xyz": [0.01, -0.50, -0.86], "gyro_dps_xyz": [0.0, 0.1, -0.1], "pdm_mic_rms": 108, "accel_saturated_axes": [false, false, false] },
+      { "t_rel_ms": -200.0, "accel_g_xyz": [-2.7, 1.6, -3.9], "gyro_dps_xyz": [-360.0, 98.0, -65.0], "pdm_mic_rms": 280, "accel_saturated_axes": [false, false, false] },
+      { "t_rel_ms": -2.0, "accel_g_xyz": [3.4, -1.5, -10.5], "gyro_dps_xyz": [1210.0, -135.0, 495.0], "pdm_mic_rms": 840, "accel_saturated_axes": [false, false, false] },
+      { "t_rel_ms": 0.0, "accel_g_xyz": [-16.0, 16.0, -16.0], "gyro_dps_xyz": [1150.0, -145.0, 250.0], "pdm_mic_rms": 61500, "accel_saturated_axes": [true, true, true] },
+      { "t_rel_ms": 1.0, "accel_g_xyz": [16.0, -16.0, -16.0], "gyro_dps_xyz": [1130.0, -150.0, 248.0], "pdm_mic_rms": 49800, "accel_saturated_axes": [true, true, true] },
+      { "t_rel_ms": 2.0, "accel_g_xyz": [-16.0, 14.2, -15.1], "gyro_dps_xyz": [1115.0, -142.0, 260.0], "pdm_mic_rms": 31200, "accel_saturated_axes": [true, false, false] },
+      { "t_rel_ms": 8.0, "accel_g_xyz": [-11.4, 9.8, -12.2], "gyro_dps_xyz": [990.0, -120.0, 390.0], "pdm_mic_rms": 12400, "accel_saturated_axes": [false, false, false] }
+    ]
+  },
+  "swing_event_classification": "ball_strike",
+  "impact_clipping_signature": {
+    "saturated_at_16g": true,
+    "pdm_mic_impact_confirmed": true,
+    "clipping_duration_ms": 3.0,
+    "axial_gyro_twist_impulse_dps": -245.0,
+    "ring_down_energy_g2_ms": 182.4,
+    "estimated_horizontal_impact_mm": -14.0,
+    "strike_zone": "toe",
+    "strike_quality_index": 64.0
+  },
+  "compensated_clubhead_at_impact": {
+    "clubhead_speed_mps": 36.8,
+    "hand_speed_mps": 7.4,
+    "club_path_deg": 0.5,
+    "attack_angle_deg": -3.2,
+    "raw_butt_face_angle_deg": 2.9,
+    "shaft_deflection_state": {
+      "lead_deflection_mm": 22.4,
+      "toe_down_droop_mm": 12.6,
+      "dynamic_loft_addition_deg": 1.8,
+      "torsional_twist_deg": -1.1,
+      "kick_velocity_mps": 1.9
+    },
+    "compensated_face_angle_deg": 1.8,
+    "compensated_dynamic_loft_deg": 29.6,
+    "compensated_dynamic_lie_deg": 63.0,
+    "tempo_backswing_to_downswing_ratio": 2.88
+  }
+}

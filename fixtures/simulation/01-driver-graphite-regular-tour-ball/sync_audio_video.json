@@ -1,0 +1,44 @@
+{
+  "session_id": "sess-sim-01",
+  "topology_version": "v1_single_smartphone",
+  "primary_camera_role": "dtl",
+  "spatial_calibration_frame": {
+    "virtual_spirit_level_roll_deg": 0.2,
+    "virtual_spirit_level_pitch_deg": -0.8,
+    "camera_to_ball_distance_m": 2.6,
+    "camera_height_m": 1.02,
+    "ground_target_line_locked": true,
+    "calibration_valid": true
+  },
+  "camera_streams": [
+    {
+      "stream_id": "cam-primary-dtl",
+      "role": "dtl",
+      "fps": 120,
+      "shutter_speed_inv_s": 1000,
+      "resolution": "1920x1080"
+    }
+  ],
+  "impact_sync_anchor": {
+    "sync_method": "ACOUSTIC_SHOCK_AND_16G_CLIPPING",
+    "imu_impact_timestamp_ms": 1500.0,
+    "audio_peak_raw_timestamp_ms": 1531.58,
+    "acoustic_tof_correction_ms": 7.58,
+    "aligned_sync_offset_ms": 24.0,
+    "sync_uncertainty_ms": 0.8
+  },
+  "dtl_launch_window": {
+    "tracked_frames_count": 5,
+    "measured_vertical_launch_deg": 13.4,
+    "measured_horizontal_launch_deg": 1.1,
+    "measured_ball_speed_mps": 66.2,
+    "launch_visibility_confidence": 0.94
+  },
+  "pose_kinematics_summary": {
+    "shoulder_turn_top_deg": 92.5,
+    "hip_turn_top_deg": 44.0,
+    "x_factor_top_deg": 48.5,
+    "pelvis_lateral_sway_cm": 3.2,
+    "swing_plane_angle_deg": 58.5
+  }
+}

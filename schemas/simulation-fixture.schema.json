@@ -1,0 +1,80 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://kinetra.golf/schemas/simulation-fixture.schema.json",
+  "title": "SimulationFixtureManifestAndAssertions",
+  "description": "Master contract for deterministic CI/CD simulation scenarios in fixtures/simulation/*.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "scenario_id",
+    "title",
+    "verified_requirements",
+    "environment_conditions",
+    "simulate_virtual_ball_on_dry_swing",
+    "club_profile",
+    "ball_profile",
+    "expected_tolerances"
+  ],
+  "properties": {
+    "scenario_id": {
+      "type": "string",
+      "pattern": "^[0-9]{2}-[a-z0-9-]+$"
+    },
+    "title": {
+      "type": "string"
+    },
+    "verified_requirements": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "string",
+        "pattern": "^REQ-(ARCH|IMU|SYNC|BAG|BAL|SIM|API)-[0-9]{3}$"
+      }
+    },
+    "environment_conditions": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["temperature_c", "altitude_m", "pressure_hpa", "wind_vector_mps_xyz"],
+      "properties": {
+        "temperature_c": { "type": "number", "default": 20.0 },
+        "altitude_m": { "type": "number", "default": 0.0 },
+        "pressure_hpa": { "type": "number", "default": 1013.25 },
+        "wind_vector_mps_xyz": {
+          "type": "array",
+          "items": { "type": "number" },
+          "minItems": 3,
+          "maxItems": 3
+        }
+      }
+    },
+    "simulate_virtual_ball_on_dry_swing": {
+      "type": "boolean"
+    },
+    "club_profile": {
+      "$ref": "https://kinetra.golf/schemas/club-profile.schema.json"
+    },
+    "ball_profile": {
+      "$ref": "https://kinetra.golf/schemas/ball-profile.schema.json"
+    },
+    "expected_tolerances": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "max_sync_offset_error_ms",
+        "max_face_angle_error_deg",
+        "max_dynamic_loft_error_deg",
+        "max_impact_location_error_mm",
+        "max_carry_distance_error_m",
+        "max_lateral_offline_error_m"
+      ],
+      "properties": {
+        "max_sync_offset_error_ms": { "type": "number", "minimum": 0.1, "maximum": 10.0 },
+        "max_face_angle_error_deg": { "type": "number", "minimum": 0.05, "maximum": 1.0 },
+        "max_dynamic_loft_error_deg": { "type": "number", "minimum": 0.05, "maximum": 1.0 },
+        "max_impact_location_error_mm": { "type": "number", "minimum": 0.5, "maximum": 8.0 },
+        "max_carry_distance_error_m": { "type": "number", "minimum": 0.1, "maximum": 2.0 },
+        "max_lateral_offline_error_m": { "type": "number", "minimum": 0.1, "maximum": 2.0 }
+      }
+    }
+  }
+}

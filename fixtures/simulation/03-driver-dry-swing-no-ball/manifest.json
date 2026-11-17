@@ -1,0 +1,74 @@
+{
+  "scenario_id": "03-driver-dry-swing-no-ball",
+  "title": "Driver 10.5° Graphite Stiff — Dry Swing on Practice Mat (No Ball Strike, No 16g Clipping, Virtual Flight Enabled)",
+  "verified_requirements": [
+    "REQ-IMU-004",
+    "REQ-IMU-006",
+    "REQ-SYNC-004",
+    "REQ-BAL-005"
+  ],
+  "environment_conditions": {
+    "temperature_c": 20.0,
+    "altitude_m": 0.0,
+    "pressure_hpa": 1013.25,
+    "wind_vector_mps_xyz": [0.0, 0.0, 0.0]
+  },
+  "simulate_virtual_ball_on_dry_swing": true,
+  "club_profile": {
+    "club_id": "club-1w-qi10-stiff",
+    "club_category": "driver",
+    "club_label": "1W",
+    "handedness": "right_handed",
+    "brand": "TaylorMade",
+    "model": "Qi10",
+    "shaft_model": "Fujikura Ventus TR Blue 6-S",
+    "shaft_material": "graphite",
+    "flex_rating": "S",
+    "catalog_resolution_source": "EXACT_MODEL_MATCH",
+    "physics_parameters": {
+      "total_length_m": 1.156,
+      "grip_hand_hold_length_m": 0.20,
+      "static_loft_deg": 9.5,
+      "static_lie_deg": 58.0,
+      "head_mass_g": 202.0,
+      "cg_offset_mm": {
+        "x_back_mm": -33.0,
+        "y_toe_ward_mm": 22.0,
+        "z_up_mm": 1.5
+      },
+      "ei_lead_lag_nm2": 39.5,
+      "ei_droop_nm2": 39.5,
+      "gj_torsion_nm2": 24.8,
+      "anisotropic_coupling_kappa": 0.11,
+      "shaft_wave_speed_mps": 3850.0,
+      "grip_elastomer_damping_ms": 0.18
+    },
+    "butt_cap_mount": {
+      "mount_slot_id": 2,
+      "gpio_binary_code_d3_d0": "1101",
+      "keyway_type": "ASYMMETRIC_D_LOCK_V1",
+      "nominal_face_alignment_offset_deg": 0.0
+    }
+  },
+  "ball_profile": {
+    "ball_profile_id": "ball-tour-prov1",
+    "ball_type": "tour_ball",
+    "display_name": "Titleist Pro V1 (Tour Urethane)",
+    "mass_g": 45.93,
+    "diameter_mm": 42.67,
+    "nominal_cor": 0.825,
+    "iron_spin_generation_factor": 1.0,
+    "driver_spin_generation_factor": 1.0,
+    "drag_coefficient_multiplier": 1.0,
+    "lift_coefficient_multiplier": 1.0,
+    "spin_decay_time_constant_s": 28.0
+  },
+  "expected_tolerances": {
+    "max_sync_offset_error_ms": 6.0,
+    "max_face_angle_error_deg": 0.3,
+    "max_dynamic_loft_error_deg": 0.4,
+    "max_impact_location_error_mm": 3.5,
+    "max_carry_distance_error_m": 0.5,
+    "max_lateral_offline_error_m": 0.35
+  }
+}

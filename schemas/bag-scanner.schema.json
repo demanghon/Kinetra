@@ -1,0 +1,109 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://kinetra.golf/schemas/bag-scanner.schema.json",
+  "title": "BagScannerInteractiveEvent",
+  "description": "Interactive voice-guided (TTS) and continuous video club onboarding state, supporting full-bag onboarding and single-club post-hoc update with 4-bit Auto-ID mount binding.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "scan_session_id",
+    "scan_mode",
+    "current_state",
+    "tts_utterance_fr",
+    "frame_sharpness_score",
+    "detected_mount_slot_id",
+    "extracted_attributes",
+    "requires_user_confirmation",
+    "resolved_club_profile"
+  ],
+  "properties": {
+    "scan_session_id": {
+      "type": "string"
+    },
+    "scan_mode": {
+      "type": "string",
+      "enum": ["FULL_BAG_ONBOARDING", "SINGLE_CLUB_UPDATE"],
+      "description": "FULL_BAG_ONBOARDING scans clubs sequentially; SINGLE_CLUB_UPDATE updates or replaces a single club/mount slot without rescanning the rest of the bag."
+    },
+    "current_state": {
+      "type": "string",
+      "enum": [
+        "WAIT_CLUB_HEAD",
+        "SCANNING_HEAD",
+        "ASK_USER_HEAD",
+        "WAIT_SHAFT_LABEL",
+        "SCANNING_SHAFT",
+        "ASK_USER_SHAFT",
+        "WAIT_MOUNT_CLIP",
+        "RESOLVE_PHYSICS",
+        "CLUB_SAVED"
+      ]
+    },
+    "tts_utterance_fr": {
+      "type": "string",
+      "description": "Spoken French guidance delivered to the golfer via Text-To-Speech."
+    },
+    "frame_sharpness_score": {
+      "type": "number",
+      "minimum": 0.0,
+      "maximum": 1.0
+    },
+    "detected_mount_slot_id": {
+      "type": ["integer", "null"],
+      "minimum": 1,
+      "maximum": 14,
+      "description": "Mount slot ID (1..14) received over BLE when the golfer clips the XIAO sensor onto the club's Keyed Butt-Cap Mount."
+    },
+    "extracted_attributes": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "club_category",
+        "club_label",
+        "brand",
+        "model",
+        "shaft_material",
+        "flex_rating",
+        "confidences"
+      ],
+      "properties": {
+        "club_category": {
+          "type": ["string", "null"],
+          "enum": ["driver", "fairway_wood", "hybrid", "iron", "wedge", "putter", null]
+        },
+        "club_label": { "type": ["string", "null"] },
+        "brand": { "type": ["string", "null"] },
+        "model": { "type": ["string", "null"] },
+        "shaft_model": { "type": ["string", "null"] },
+        "shaft_material": {
+          "type": ["string", "null"],
+          "enum": ["steel", "graphite", null]
+        },
+        "flex_rating": {
+          "type": ["string", "null"],
+          "enum": ["L", "A", "R", "S", "X", null]
+        },
+        "confidences": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["head_confidence", "shaft_material_confidence", "flex_confidence"],
+          "properties": {
+            "head_confidence": { "type": "number", "minimum": 0.0, "maximum": 1.0 },
+            "shaft_material_confidence": { "type": "number", "minimum": 0.0, "maximum": 1.0 },
+            "flex_confidence": { "type": "number", "minimum": 0.0, "maximum": 1.0 }
+          }
+        }
+      }
+    },
+    "requires_user_confirmation": {
+      "type": "boolean",
+      "description": "True whenever any required attribute confidence is below 0.85 after the 6s scan window."
+    },
+    "resolved_club_profile": {
+      "oneOf": [
+        { "$ref": "https://kinetra.golf/schemas/club-profile.schema.json" },
+        { "type": "null" }
+      ]
+    }
+  }
+}

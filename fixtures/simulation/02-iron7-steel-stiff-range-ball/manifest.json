@@ -1,0 +1,76 @@
+{
+  "scenario_id": "02-iron7-steel-stiff-range-ball",
+  "title": "Iron 7 32° Steel Stiff + Practice Range Ball — Steel Torsional Stiffness & Range Ball Conversion",
+  "verified_requirements": [
+    "REQ-IMU-003",
+    "REQ-IMU-005",
+    "REQ-IMU-006",
+    "REQ-BAL-001",
+    "REQ-BAL-003",
+    "REQ-BAL-004"
+  ],
+  "environment_conditions": {
+    "temperature_c": 18.0,
+    "altitude_m": 80.0,
+    "pressure_hpa": 1013.25,
+    "wind_vector_mps_xyz": [-2.0, 0.0, 0.0]
+  },
+  "simulate_virtual_ball_on_dry_swing": false,
+  "club_profile": {
+    "club_id": "club-7i-t100-stiff",
+    "club_category": "iron",
+    "club_label": "7I",
+    "handedness": "right_handed",
+    "brand": "Titleist",
+    "model": "T100",
+    "shaft_model": "True Temper Dynamic Gold S300",
+    "shaft_material": "steel",
+    "flex_rating": "S",
+    "catalog_resolution_source": "EXACT_MODEL_MATCH",
+    "physics_parameters": {
+      "total_length_m": 0.940,
+      "grip_hand_hold_length_m": 0.20,
+      "static_loft_deg": 32.0,
+      "static_lie_deg": 62.0,
+      "head_mass_g": 270.0,
+      "cg_offset_mm": {
+        "x_back_mm": -10.5,
+        "y_toe_ward_mm": 18.0,
+        "z_up_mm": -2.0
+      },
+      "ei_lead_lag_nm2": 54.0,
+      "ei_droop_nm2": 54.0,
+      "gj_torsion_nm2": 51.0,
+      "anisotropic_coupling_kappa": 0.0,
+      "shaft_wave_speed_mps": 5100.0,
+      "grip_elastomer_damping_ms": 0.15
+    },
+    "butt_cap_mount": {
+      "mount_slot_id": 7,
+      "gpio_binary_code_d3_d0": "1000",
+      "keyway_type": "ASYMMETRIC_D_LOCK_V1",
+      "nominal_face_alignment_offset_deg": 0.0
+    }
+  },
+  "ball_profile": {
+    "ball_profile_id": "ball-range-2pc",
+    "ball_type": "range_ball",
+    "display_name": "Standard 2-Piece Practice Range Ball",
+    "mass_g": 45.60,
+    "diameter_mm": 42.70,
+    "nominal_cor": 0.765,
+    "iron_spin_generation_factor": 0.84,
+    "driver_spin_generation_factor": 1.08,
+    "drag_coefficient_multiplier": 1.08,
+    "lift_coefficient_multiplier": 0.94,
+    "spin_decay_time_constant_s": 28.0
+  },
+  "expected_tolerances": {
+    "max_sync_offset_error_ms": 1.5,
+    "max_face_angle_error_deg": 0.3,
+    "max_dynamic_loft_error_deg": 0.4,
+    "max_impact_location_error_mm": 3.5,
+    "max_carry_distance_error_m": 0.5,
+    "max_lateral_offline_error_m": 0.35
+  }
+}

@@ -1,0 +1,77 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://kinetra.golf/schemas/ball-profile.schema.json",
+  "title": "BallProfile",
+  "description": "Aerodynamic and collision restitution characterization of the golf ball (range_ball vs tour_ball).",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "ball_profile_id",
+    "ball_type",
+    "display_name",
+    "mass_g",
+    "diameter_mm",
+    "nominal_cor",
+    "iron_spin_generation_factor",
+    "driver_spin_generation_factor",
+    "drag_coefficient_multiplier",
+    "lift_coefficient_multiplier",
+    "spin_decay_time_constant_s"
+  ],
+  "properties": {
+    "ball_profile_id": {
+      "type": "string",
+      "pattern": "^[a-z0-9-]+$"
+    },
+    "ball_type": {
+      "type": "string",
+      "enum": ["tour_ball", "range_ball"]
+    },
+    "display_name": {
+      "type": "string",
+      "examples": ["Titleist Pro V1 (Tour Urethane)", "Standard 2-Piece Practice Range Ball"]
+    },
+    "mass_g": {
+      "type": "number",
+      "minimum": 44.0,
+      "maximum": 46.2
+    },
+    "diameter_mm": {
+      "type": "number",
+      "minimum": 42.60,
+      "maximum": 43.20
+    },
+    "nominal_cor": {
+      "type": "number",
+      "minimum": 0.70,
+      "maximum": 0.835,
+      "description": "Coefficient of restitution at standard driver impact speed (~0.825 tour_ball vs ~0.765 range_ball)."
+    },
+    "iron_spin_generation_factor": {
+      "type": "number",
+      "minimum": 0.65,
+      "maximum": 1.15
+    },
+    "driver_spin_generation_factor": {
+      "type": "number",
+      "minimum": 0.85,
+      "maximum": 1.25
+    },
+    "drag_coefficient_multiplier": {
+      "type": "number",
+      "minimum": 0.90,
+      "maximum": 1.25
+    },
+    "lift_coefficient_multiplier": {
+      "type": "number",
+      "minimum": 0.80,
+      "maximum": 1.15
+    },
+    "spin_decay_time_constant_s": {
+      "type": "number",
+      "minimum": 15.0,
+      "maximum": 40.0,
+      "default": 28.0
+    }
+  }
+}

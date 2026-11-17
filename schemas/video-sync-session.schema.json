@@ -1,0 +1,126 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://kinetra.golf/schemas/video-sync-session.schema.json",
+  "title": "VideoSyncSession",
+  "description": "Single-Camera Session (v1: DTL or Face-On) extensible to Dual-Camera (v2), Spatial Calibration Frame, and millisecond Impact Sync Anchor.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "session_id",
+    "topology_version",
+    "primary_camera_role",
+    "spatial_calibration_frame",
+    "camera_streams",
+    "impact_sync_anchor",
+    "pose_kinematics_summary"
+  ],
+  "properties": {
+    "session_id": {
+      "type": "string"
+    },
+    "topology_version": {
+      "type": "string",
+      "enum": ["v1_single_smartphone", "v2_dual_smartphone"]
+    },
+    "primary_camera_role": {
+      "type": "string",
+      "enum": ["dtl", "face_on"]
+    },
+    "spatial_calibration_frame": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "virtual_spirit_level_roll_deg",
+        "virtual_spirit_level_pitch_deg",
+        "camera_to_ball_distance_m",
+        "camera_height_m",
+        "ground_target_line_locked",
+        "calibration_valid"
+      ],
+      "properties": {
+        "virtual_spirit_level_roll_deg": { "type": "number", "minimum": -1.0, "maximum": 1.0 },
+        "virtual_spirit_level_pitch_deg": { "type": "number", "minimum": -3.0, "maximum": 3.0 },
+        "camera_to_ball_distance_m": { "type": "number", "minimum": 1.5, "maximum": 4.5 },
+        "camera_height_m": { "type": "number", "minimum": 0.5, "maximum": 1.8 },
+        "ground_target_line_locked": { "type": "boolean", "const": true },
+        "calibration_valid": { "type": "boolean", "const": true }
+      }
+    },
+    "camera_streams": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 2,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["stream_id", "role", "fps", "shutter_speed_inv_s", "resolution"],
+        "properties": {
+          "stream_id": { "type": "string" },
+          "role": { "type": "string", "enum": ["dtl", "face_on"] },
+          "fps": { "type": "integer", "minimum": 60, "maximum": 240 },
+          "shutter_speed_inv_s": { "type": "integer", "minimum": 250 },
+          "resolution": { "type": "string", "examples": ["1920x1080", "1280x720"] }
+        }
+      }
+    },
+    "impact_sync_anchor": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "sync_method",
+        "imu_impact_timestamp_ms",
+        "audio_peak_raw_timestamp_ms",
+        "acoustic_tof_correction_ms",
+        "aligned_sync_offset_ms",
+        "sync_uncertainty_ms"
+      ],
+      "properties": {
+        "sync_method": {
+          "type": "string",
+          "enum": ["ACOUSTIC_SHOCK_AND_16G_CLIPPING", "OPTICAL_FLASH_AND_ACOUSTIC", "DRY_SWING_LOW_POINT_CORRELATION"]
+        },
+        "imu_impact_timestamp_ms": { "type": "number" },
+        "audio_peak_raw_timestamp_ms": { "type": ["number", "null"] },
+        "acoustic_tof_correction_ms": { "type": "number", "minimum": 0.0, "maximum": 20.0 },
+        "aligned_sync_offset_ms": { "type": "number" },
+        "sync_uncertainty_ms": { "type": "number", "minimum": 0.0, "maximum": 8.0 }
+      }
+    },
+    "dtl_launch_window": {
+      "type": ["object", "null"],
+      "additionalProperties": false,
+      "required": [
+        "tracked_frames_count",
+        "measured_vertical_launch_deg",
+        "measured_horizontal_launch_deg",
+        "measured_ball_speed_mps",
+        "launch_visibility_confidence"
+      ],
+      "properties": {
+        "tracked_frames_count": { "type": "integer", "minimum": 0, "maximum": 12 },
+        "measured_vertical_launch_deg": { "type": "number", "minimum": 0.0, "maximum": 55.0 },
+        "measured_horizontal_launch_deg": { "type": "number", "minimum": -25.0, "maximum": 25.0 },
+        "measured_ball_speed_mps": { "type": "number", "minimum": 10.0, "maximum": 95.0 },
+        "launch_visibility_confidence": { "type": "number", "minimum": 0.0, "maximum": 1.0 }
+      }
+    },
+    "pose_kinematics_summary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "shoulder_turn_top_deg",
+        "hip_turn_top_deg",
+        "x_factor_top_deg",
+        "pelvis_lateral_sway_cm",
+        "swing_plane_angle_deg"
+      ],
+      "properties": {
+        "shoulder_turn_top_deg": { "type": "number" },
+        "hip_turn_top_deg": { "type": "number" },
+        "x_factor_top_deg": { "type": "number" },
+        "pelvis_lateral_sway_cm": { "type": "number" },
+        "swing_plane_angle_deg": { "type": "number" }
+      }
+    }
+  }
+}

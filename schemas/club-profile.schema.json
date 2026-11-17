@@ -1,0 +1,181 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://kinetra.golf/schemas/club-profile.schema.json",
+  "title": "ClubProfile",
+  "description": "Physical, geometric, and elastodynamic specification of a golf club and its 4-bit Auto-ID Keyed Butt-Cap Mount.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "club_id",
+    "club_category",
+    "club_label",
+    "handedness",
+    "brand",
+    "model",
+    "shaft_material",
+    "flex_rating",
+    "physics_parameters",
+    "butt_cap_mount"
+  ],
+  "properties": {
+    "club_id": {
+      "type": "string",
+      "pattern": "^[a-z0-9-]+$",
+      "description": "Unique identifier for the club in the golfer's bag."
+    },
+    "club_category": {
+      "type": "string",
+      "enum": ["driver", "fairway_wood", "hybrid", "iron", "wedge", "putter"]
+    },
+    "club_label": {
+      "type": "string",
+      "examples": ["1W", "3W", "4H", "7I", "PW", "SW-56"]
+    },
+    "handedness": {
+      "type": "string",
+      "enum": ["right_handed", "left_handed"]
+    },
+    "brand": {
+      "type": "string"
+    },
+    "model": {
+      "type": "string"
+    },
+    "shaft_model": {
+      "type": "string"
+    },
+    "shaft_material": {
+      "type": "string",
+      "enum": ["steel", "graphite"],
+      "description": "Governs shear modulus, torsional stiffness GJ, and anisotropic bend-twist coupling."
+    },
+    "flex_rating": {
+      "type": "string",
+      "enum": ["L", "A", "R", "S", "X"],
+      "description": "Canonical shaft flex rating: Ladies, Senior/Amateur, Regular, Stiff, Extra-Stiff."
+    },
+    "catalog_resolution_source": {
+      "type": "string",
+      "enum": ["EXACT_MODEL_MATCH", "ARCHETYPE_FALLBACK", "USER_CUSTOM"]
+    },
+    "physics_parameters": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "total_length_m",
+        "grip_hand_hold_length_m",
+        "static_loft_deg",
+        "static_lie_deg",
+        "head_mass_g",
+        "cg_offset_mm",
+        "ei_lead_lag_nm2",
+        "ei_droop_nm2",
+        "gj_torsion_nm2",
+        "anisotropic_coupling_kappa",
+        "shaft_wave_speed_mps",
+        "grip_elastomer_damping_ms"
+      ],
+      "properties": {
+        "total_length_m": {
+          "type": "number",
+          "minimum": 0.70,
+          "maximum": 1.25
+        },
+        "grip_hand_hold_length_m": {
+          "type": "number",
+          "minimum": 0.12,
+          "maximum": 0.30,
+          "default": 0.20,
+          "description": "Clamped grip length d_hands subtracted from total_length_m to yield free flexing shaft length L_free."
+        },
+        "static_loft_deg": {
+          "type": "number",
+          "minimum": 2.0,
+          "maximum": 64.0
+        },
+        "static_lie_deg": {
+          "type": "number",
+          "minimum": 50.0,
+          "maximum": 72.0
+        },
+        "head_mass_g": {
+          "type": "number",
+          "minimum": 180.0,
+          "maximum": 360.0
+        },
+        "cg_offset_mm": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["x_back_mm", "y_toe_ward_mm", "z_up_mm"],
+          "properties": {
+            "x_back_mm": { "type": "number", "minimum": -50.0, "maximum": 0.0 },
+            "y_toe_ward_mm": { "type": "number", "minimum": 10.0, "maximum": 55.0 },
+            "z_up_mm": { "type": "number", "minimum": -25.0, "maximum": 25.0 }
+          }
+        },
+        "ei_lead_lag_nm2": {
+          "type": "number",
+          "minimum": 15.0,
+          "maximum": 90.0
+        },
+        "ei_droop_nm2": {
+          "type": "number",
+          "minimum": 15.0,
+          "maximum": 90.0
+        },
+        "gj_torsion_nm2": {
+          "type": "number",
+          "minimum": 10.0,
+          "maximum": 80.0
+        },
+        "anisotropic_coupling_kappa": {
+          "type": "number",
+          "minimum": -0.30,
+          "maximum": 0.30
+        },
+        "shaft_wave_speed_mps": {
+          "type": "number",
+          "minimum": 2500.0,
+          "maximum": 6000.0
+        },
+        "grip_elastomer_damping_ms": {
+          "type": "number",
+          "minimum": 0.05,
+          "maximum": 0.80
+        }
+      }
+    },
+    "butt_cap_mount": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "mount_slot_id",
+        "gpio_binary_code_d3_d0",
+        "keyway_type",
+        "nominal_face_alignment_offset_deg"
+      ],
+      "properties": {
+        "mount_slot_id": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 14,
+          "description": "Hardware slot ID (1..14) decoded from the 4-bit GPIO jumper (D0..D3 to GND) inside the club's mount."
+        },
+        "gpio_binary_code_d3_d0": {
+          "type": "string",
+          "pattern": "^(?!1111$)[01]{4}$",
+          "description": "4-bit logic level read on (D3,D2,D1,D0) when mounted (0 = wired to GND, 1 = pull-up; 1111 is reserved for unmounted)."
+        },
+        "keyway_type": {
+          "type": "string",
+          "const": "ASYMMETRIC_D_LOCK_V1"
+        },
+        "nominal_face_alignment_offset_deg": {
+          "type": "number",
+          "minimum": -5.0,
+          "maximum": 5.0
+        }
+      }
+    }
+  }
+}

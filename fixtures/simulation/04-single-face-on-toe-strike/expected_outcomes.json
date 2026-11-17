@@ -1,0 +1,34 @@
+{
+  "capture_id": "cap-sim-04",
+  "fusion_mode": "AUTONOMOUS_IMU_FACE_ON",
+  "is_dry_swing": false,
+  "is_virtual_ball": false,
+  "launch_conditions": {
+    "ball_speed_mps": 46.9,
+    "smash_factor": 1.274,
+    "vertical_launch_angle_deg": 19.2,
+    "horizontal_launch_angle_deg": 2.4,
+    "total_spin_rpm": 5890.0,
+    "backspin_rpm": 5840.0,
+    "sidespin_rpm": 765.0,
+    "spin_axis_tilt_deg": 7.5
+  },
+  "flight_summary": {
+    "active_ball_type": "tour_ball",
+    "carry_distance_m": 129.4,
+    "roll_distance_m": 6.1,
+    "total_distance_m": 135.5,
+    "lateral_offline_carry_m": 8.2,
+    "lateral_offline_total_m": 9.1,
+    "apex_height_m": 25.1,
+    "landing_angle_deg": 45.8,
+    "flight_time_s": 5.42,
+    "tour_ball_equivalent_carry_m": 129.4
+  },
+  "trajectory_points_50hz": [
+    { "t_s": 0.0, "x_m": 0.0, "y_m": 0.0, "z_m": 0.0, "phase": "airborne" },
+    { "t_s": 2.7, "x_m": 74.0, "y_m": 3.5, "z_m": 25.1, "phase": "airborne" },
+    { "t_s": 5.42, "x_m": 129.4, "y_m": 8.2, "z_m": 0.0, "phase": "bounce" },
+    { "t_s": 6.8, "x_m": 135.5, "y_m": 9.1, "z_m": 0.0, "phase": "roll" }
+  ]
+}
