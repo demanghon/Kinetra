@@ -46,23 +46,26 @@ flowchart TB
         Switch --- XIAO
     end
 
-    subgraph Embase["Embase Club Permanente (Keyed Magnetic Butt-Cap Mount — ~3.2g)"]
+    subgraph Embase["Embase Club Permanente Non-Destructive (Keyed Magnetic Butt-Cap Mount — ~2.8g)"]
         FemPogo["Puits femelle en D (prof. 3.5mm) + Cible Magnétique 5 pastilles dorées"]
         SolderPocket["Chambre arrière étanche (Epoxy) : Ponts de fil 0.20mm² (Code binaire 1..14)"]
-        Collar["Collerette d'appui sur grip (Ø 26mm) avec 3 picots anti-rotation + Flèche Leading Edge"]
-        Screw["Vis conique autotaraudeuse (Ø 4.5mm × L 18mm) vissée dans le trou d'évent du grip"]
-        FemPogo --> SolderPocket --> Collar --> Screw
+        Collar["Semelle plate lisse (Ø 26mm) sans picots + Flèche d'alignement Leading Edge"]
+        VHB["Rondelle adhésive double-face 3M VHB (Ø 25mm, ép. 0.5mm, démontable sans trace)"]
+        CenterPin["Pion de centrage lisse à bout rond (Ø 3.8mm × L 10mm) dans le trou d'évent d'origine du grip"]
+        FemPogo --> SolderPocket --> Collar --> VHB --> CenterPin
     end
 
     MalePogo == "1. Attraction Magnétique N52 + 2. Verrouillage Mécanique en D" ==> FemPogo
 ```
 
-### A. Modélisation 3D de l'Embase Club (`Keyed Magnetic Butt-Cap Mount` — 14 unités)
-1. **Tige filetée conique d'ancrage dans le grip (`Grip Vent Screw`)** :
-   - Tige centrale conique ($\varnothing 4.5\text{ mm}$ à la base $\rightarrow \varnothing 3.0\text{ mm}$ en pointe, longueur $18.0\text{ mm}$, filet large autotaraudeur pas $2.2\text{ mm}$) qui se visse sans outil (à la main) dans l'évent standard de tout grip de golf.
-2. **Collerette d'assise anti-rotation (`Anti-Twist Flange`)** :
-   - Disque d'appui $\varnothing 26.0\text{ mm}$ dont la face inférieure comporte **3 ergots pyramidaux de $1.2\text{ mm}$** qui s'enfoncent dans l'élastomère du sommet du grip lors du serrage, rendant toute rotation accidentelle de l'embase impossible.
-   - Gravure laser / relief sur le bord supérieur : **Flèche `▲ FACE`** à aligner avec la rainure centrale du grip et le bord d'attaque (*leading edge*) de la face du club.
+### A. Modélisation 3D de l'Embase Club Non-Destructive (`Keyed Magnetic Butt-Cap Mount` — 14 unités)
+Afin de **ne jamais abîmer, percer ni marquer le grip** (aucune vis tranchante ni aucun picot), l'embase utilise une fixation **100 % réversible** combinant :
+1. **Pion de centrage lisse non-fileté (`Smooth Vent Hole Centering Pin`)** :
+   - Tous les grips de golf possèdent d'usine un trou d'évent central au sommet du bouchon (*butt-cap vent hole*, $\varnothing 3.2\text{ à }3.8\text{ mm}$) servant à évacuer l'air lors du montage du grip.
+   - L'embase comporte sous sa semelle un simple **pion cylindrique lisse à extrémité hémisphérique ($\varnothing 3.8\text{ mm} \times \text{longueur } 10.0\text{ mm}$, sans aucun filet coupant)** qui s'insère en léger serrage élastique dans ce trou existant. Il centre automatiquement l'embase sur l'axe du shaft ($s = 0$) et reprend l'effort de cisaillement latéral pendant le swing sans jamais entailler le caoutchouc.
+2. **Semelle plate lisse + Rondelle Double-Face 3M VHB (`Non-Marking Adhesive Pad`)** :
+   - La face inférieure du disque d'appui ($\varnothing 26.0\text{ mm}$) est **totalement lisse (zéro picot)** et reçoit une rondelle découpée de ruban double-face acrylique **3M VHB** (que vous avez déjà dans la liste des fournitures pour la batterie).
+   - Le double-face VHB bloque toute rotation axiale de l'embase une fois la flèche **`▲ FACE`** alignée avec la face du club, amortit les vibrations, et se retire proprement à la main sans laisser la moindre trace ni perforation sur le grip.
 3. **Puits de réception en « D » & Logement du Connecteur Magnétique Femelle** :
    - Cavité supérieure en forme de **« D » asymétrique** ($\varnothing 18.0\text{ mm}$ avec méplat d'indexation à $7.0\text{ mm}$ du centre, profondeur $3.5\text{ mm}$) garantissant une erreur angulaire $\le \pm 0.15^\circ$.
    - Deux micro-rainures latérales à bille/lèvre souple (*Snap-Fit Detent*) retiennent mécaniquement le capteur contre l'arrachement centrifuge en complément des aimants néodyme N52 du connecteur Pogo-Pin 5 broches.
