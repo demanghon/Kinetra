@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <title>Kinetra — Visualiseur CAO 3D Interactif (Boîtier XIAO & Embase Non-Destructive)</title>
+  <style>
+    body {
+      margin: 0;
+      background: #0b1120;
+      color: #f8fafc;
+      font-family: system-ui, -apple-system, sans-serif;
+      display: flex;
+      height: 100vh;
+      overflow: hidden;
+    }
+    #sidebar {
+      width: 360px;
+      background: #111827;
+      border-right: 1px solid #1e293b;
+      padding: 20px;
+      overflow-y: auto;
+    }
+    h1 { font-size: 16px; color: #38bdf8; margin-top: 0; }
+    .control-group {
+      background: #1e293b;
+      border-radius: 8px;
+      padding: 12px;
+      margin-bottom: 14px;
+    }
+    label { display: block; font-size: 13px; margin-bottom: 6px; color: #cbd5e1; }
+    input[type="range"], select { width: 100%; }
+    .badge {
+      display: inline-block;
+      padding: 3px 8px;
+      border-radius: 4px;
+      background: #0284c7;
+      font-size: 12px;
+      font-weight: 600;
+    }
+    #canvas-container { flex: 1; position: relative; }
+    canvas { width: 100%; height: 100%; display: block; cursor: grab; }
+    canvas:active { cursor: grabbing; }
+    .legend-item { font-size: 12px; margin: 6px 0; display: flex; align-items: center; gap: 8px; }
+    .swatch { width: 12px; height: 12px; border-radius: 3px; display: inline-block; }
+  </style>
+</head>
+<body>
+  <div id="sidebar">
+    <h1>KINETRA — Visualiseur CAO 3D</h1>
+    <p style="font-size: 12px; color: #94a3b8;">
+      Faites glisser la souris pour tourner en 3D autour du boîtier capteur XIAO BLE et de l'embase non-destructive.
+    </p>
+
+    <div class="control-group">
+      <label>Vue Éclatée (Assemblé ↔ Éclaté) : <span id="explode-val" class="badge">65%</span></label>
+      <input id="explode" type="range" min="0" max="100" value="65" />
+    </div>
+
+    <div class="control-group">
+      <label>Inclinaison Caméra (Pitch) :</label>
+      <input id="pitch" type="range" min="10" max="75" value="32" />
+    </div>
+
+    <div class="control-group">
+      <label>Simuler le Câblage d'Embase (Slot 1..14) :</label>
+      <select id="slot-select">
+        <option value="1">Embase #1 — Driver 1W (Code 1110)</option>
+        <option value="2">Embase #2 — Bois 3W (Code 1101)</option>
+        <option value="4">Embase #4 — Fer 5I (Code 1011)</option>
+        <option value="7" selected>Embase #7 — Fer 7I (Code 1000)</option>
+        <option value="14">Embase #14 — Putter (Code 0001)</option>
+      </select>
+      <div id="wiring-info" style="margin-top:8px; font-size:12px; color:#34d399;"></div>
+    </div>
+
+    <div class="control-group">
+      <label>Nomenclature 3D (Échelle 1:1 en mm)</label>
+      <div class="legend-item"><span class="swatch" style="background:#38bdf8;"></span>Capot Boîtier XIAO (Ø32×11.5 mm, PETG-CF)</div>
+      <div class="legend-item"><span class="swatch" style="background:#10b981;"></span>Carte Seeed XIAO BLE nRF52840 (21×17.5 mm)</div>
+      <div class="legend-item"><span class="swatch" style="background:#f59e0b;"></span>Accu LiPo 85mAh L301525 (30×15×2.5 mm)</div>
+      <div class="legend-item"><span class="swatch" style="background:#facc15;"></span>Embase Puits en D + Pogo Magnétique 5 pins</div>
+      <div class="legend-item"><span class="swatch" style="background:#ef4444;"></span>Rondelle 3M VHB Ø25mm + Pion Lisse Ø3.8mm</div>
+    </div>
+  </div>
+  <div id="canvas-container">
+    <canvas id="cad-canvas"></canvas>
+  </div>
+
+  <script>
+    const canvas = document.getElementById("cad-canvas");
+    const ctx = canvas.getContext("2d");
+    const explodeSlider = document.getElementById("explode");
+    const pitchSlider = document.getElementById("pitch");
+    const slotSelect = document.getElementById("slot-select");
+    const wiringInfo = document.getElementById("wiring-info");
+
+    let yaw = -0.65;
+    let isDragging = false;
+    let lastX = 0;
+
+    canvas.addEventListener("mousedown", (e) => { isDragging = true; lastX = e.clientX; });
+    window.addEventListener("mouseup", () => { isDragging = false; });
+    window.addEventListener("mousemove", (e) => {
+      if (!isDragging) return;
+      yaw += (e.clientX - lastX) * 0.01;
+      lastX = e.clientX;
+      render();
+    });
+    explodeSlider.addEventListener("input", render);
+    pitchSlider.addEventListener("input", render);
+    slotSelect.addEventListener("change", render);
+    window.addEventListener("resize", render);
+
+    function project(x, y, z, cx, cy, scale, pitch) {
+      const x1 = x * Math.cos(yaw) - y * Math.sin(yaw);
+      const y1 = x * Math.sin(yaw) + y * Math.cos(yaw);
+      return [
+        cx + x1 * scale,
+        cy + (y1 * Math.sin(pitch) - z * Math.cos(pitch)) * scale
+      ];
+    }
+
+    function drawCyl(rBot, rTop, z0, z1, cx, cy, scale, pitch, fillTop, fillSide, stroke, dFlat = null) {
+      const segs = 48;
+      const bot = [], top = [];
+      for (let i = 0; i < segs; i++) {
+        const a = (2 * Math.PI * i) / segs;
+        let xb = rBot * Math.cos(a), yb = rBot * Math.sin(a);
+        let xt = rTop * Math.cos(a), yt = rTop * Math.sin(a);
+        if (dFlat !== null) { yb = Math.min(yb, dFlat); yt = Math.min(yt, dFlat); }
+        bot.push(project(xb, yb, z0, cx, cy, scale, pitch));
+        top.push(project(xt, yt, z1, cx, cy, scale, pitch));
+      }
+      ctx.fillStyle = fillSide;
+      ctx.strokeStyle = stroke;
+      for (let i = 0; i < segs; i++) {
+        const nxt = (i + 1) % segs;
+        ctx.beginPath();
+        ctx.moveTo(bot[i][0], bot[i][1]);
+        ctx.lineTo(bot[nxt][0], bot[nxt][1]);
+        ctx.lineTo(top[nxt][0], top[nxt][1]);
+        ctx.lineTo(top[i][0], top[i][1]);
+        ctx.closePath();
+        ctx.fill();
+      }
+      ctx.fillStyle = fillTop;
+      ctx.beginPath();
+      top.forEach((p, idx) => idx === 0 ? ctx.moveTo(p[0], p[1]) : ctx.lineTo(p[0], p[1]));
+      ctx.closePath();
+      ctx.fill();
+      ctx.stroke();
+    }
+
+    function render() {
+      canvas.width = canvas.clientWidth;
+      canvas.height = canvas.clientHeight;
+      const cx = canvas.width / 2;
+      const cy = canvas.height * 0.68;
+      const scale = Math.min(canvas.width, canvas.height) / 68;
+      const explode = Number(explodeSlider.value) / 100;
+      document.getElementById("explode-val").textContent = `${explodeSlider.value}%`;
+      const pitch = (Number(pitchSlider.value) * Math.PI) / 180;
+
+      const slot = Number(slotSelect.value);
+      const code = (15 - slot).toString(2).padStart(4, "0");
+      wiringInfo.textContent = `Code binaire lu sur (D3..D0) = ${code} -> Club #${slot} auto-sélectionné`;
+
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      // 1. Grip Top
+      drawCyl(13.5, 13.0, -18, -6, cx, cy, scale, pitch, "#334155", "#1e293b", "#64748b");
+      // 2. Smooth Pin + 3M VHB Pad
+      const zVhb = -5 + explode * 6;
+      drawCyl(1.9, 1.9, zVhb - 9, zVhb, cx, cy, scale, pitch, "#38bdf8", "#0284c7", "#7dd3fc");
+      drawCyl(12.5, 12.5, zVhb, zVhb + 0.6, cx, cy, scale, pitch, "#ef4444", "#b91c1c", "#fca5a5");
+      // 3. Keyed Mount
+      const zMount = zVhb + 1 + explode * 7;
+      drawCyl(13.0, 12.0, zMount, zMount + 6.2, cx, cy, scale, pitch, "#475569", "#1e293b", "#38bdf8");
+      drawCyl(9.0, 9.0, zMount + 5.9, zMount + 6.3, cx, cy, scale, pitch, "#0f172a", "#0f172a", "#facc15", 7.0);
+      // 4. Male D-Plug
+      const zPlug = zMount + 3.0 + explode * 12;
+      drawCyl(8.9, 8.9, zPlug, zPlug + 3.4, cx, cy, scale, pitch, "#64748b", "#334155", "#94a3b8", 6.9);
+      // 5. LiPo L301525
+      const zLipo = zPlug + 4.0 + explode * 8;
+      drawCyl(13.0, 13.0, zLipo, zLipo + 2.5, cx, cy, scale, pitch, "#f59e0b", "#d97706", "#fde68a");
+      // 6. XIAO BLE nRF52840 Sense
+      const zXiao = zLipo + 3.0 + explode * 8;
+      drawCyl(10.5, 10.5, zXiao, zXiao + 3.2, cx, cy, scale, pitch, "#10b981", "#059669", "#a7f3d0");
+      // 7. Top Housing Cap
+      const zCap = zXiao + 3.5 + explode * 9;
+      drawCyl(16.0, 14.5, zCap, zCap + 7.5, cx, cy, scale, pitch, "#1e293b", "#0f172a", "#38bdf8");
+    }
+
+    render();
+  </script>
+</body>
+</html>
