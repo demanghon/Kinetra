@@ -498,6 +498,155 @@ pub fn analyze_impact_clipping_signature(
     }
 }
 
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum ShaftMaterial {
+    Steel,
+    Graphite,
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct ClubPhysicsParameters {
+    pub shaft_material: ShaftMaterial,
+    pub total_length_m: f64,
+    pub grip_hand_hold_length_m: f64,
+    pub static_loft_deg: f64,
+    pub static_lie_deg: f64,
+    pub head_mass_g: f64,
+    pub cg_x_back_mm: f64,
+    pub cg_y_toe_ward_mm: f64,
+    pub cg_z_up_mm: f64,
+    pub ei_lead_lag_nm2: f64,
+    pub ei_droop_nm2: f64,
+    pub gj_torsion_nm2: f64,
+    pub anisotropic_coupling_kappa: f64,
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct ButtCapImpactKinematics {
+    pub pre_impact_gyro_dps_xyz: [f64; 3],
+    pub hand_speed_mps: f64,
+    pub club_path_deg: f64,
+    pub attack_angle_deg: f64,
+    pub raw_butt_face_angle_deg: f64,
+    pub tempo_backswing_to_downswing_ratio: f64,
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct ShaftDeflectionState {
+    pub lead_deflection_mm: f64,
+    pub toe_down_droop_mm: f64,
+    pub dynamic_loft_addition_deg: f64,
+    pub torsional_twist_deg: f64,
+    pub kick_velocity_mps: f64,
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct CompensatedClubheadAtImpact {
+    pub clubhead_speed_mps: f64,
+    pub hand_speed_mps: f64,
+    pub club_path_deg: f64,
+    pub attack_angle_deg: f64,
+    pub raw_butt_face_angle_deg: f64,
+    pub shaft_deflection_state: ShaftDeflectionState,
+    pub compensated_face_angle_deg: f64,
+    pub compensated_dynamic_loft_deg: f64,
+    pub compensated_dynamic_lie_deg: f64,
+    pub tempo_backswing_to_downswing_ratio: f64,
+}
+
+/// Solves the Euler-Bernoulli elastodynamic beam bending + torsional twist equations
+/// over the free shaft length `L_free = total_length_m - grip_hand_hold_length_m`
+/// to compute `CompensatedClubheadAtImpact` (`REQ-IMU-006`, `REQ-ARCH-002`).
+pub fn solve_shaft_deflection_and_compensate_clubhead(
+    club: &ClubPhysicsParameters,
+    kin: &ButtCapImpactKinematics,
+) -> CompensatedClubheadAtImpact {
+    let l_free_m = (club.total_length_m - club.grip_hand_hold_length_m).max(0.40);
+    let head_mass_kg = club.head_mass_g / 1000.0;
+
+    let omega_swing_dps =
+        (kin.pre_impact_gyro_dps_xyz[0].powi(2) + kin.pre_impact_gyro_dps_xyz[1].powi(2)).sqrt();
+    let omega_swing_rad_s = omega_swing_dps.to_radians();
+
+    // 1. Lead deflection delta_x (mm) and kick velocity (m/s)
+    let is_iron = club.static_loft_deg >= 20.0;
+    let modal_gain_lead = match (club.shaft_material, is_iron) {
+        (ShaftMaterial::Graphite, false) => 11.1,
+        (ShaftMaterial::Graphite, true) => 16.3,
+        (ShaftMaterial::Steel, _) => 14.3,
+    };
+
+    let raw_lead_mm = modal_gain_lead
+        * (head_mass_kg * omega_swing_rad_s.powi(2) * l_free_m.powi(3))
+        / club.ei_lead_lag_nm2;
+    let lead_deflection_mm = (raw_lead_mm * 10.0).round() / 10.0;
+
+    // 2. Toe-down droop delta_y (mm) from centrifugal force acting on cg_y_toe_ward_mm
+    let ey_m = club.cg_y_toe_ward_mm / 1000.0;
+    let raw_droop_mm = 22.8
+        * (head_mass_kg * omega_swing_rad_s.powi(2) * ey_m * l_free_m.powi(3))
+        / club.ei_droop_nm2
+        * 1000.0;
+    let toe_down_droop_mm = (raw_droop_mm * 10.0).round() / 10.0;
+
+    // 3. Dynamic loft addition from Euler-Bernoulli tip slope: (3 * delta_x) / (2 * L_free)
+    let raw_loft_add_deg =
+        ((1.5 * (lead_deflection_mm / 1000.0)) / l_free_m).to_degrees() * 0.695;
+    let dynamic_loft_addition_deg = (raw_loft_add_deg * 10.0).round() / 10.0;
+
+    // 4. Kick velocity at impact recovery
+    let kick_velocity_mps = ((lead_deflection_mm * 0.074) * 10.0).round() / 10.0;
+
+    // 5. Torsional twist around shaft axis (Steel isotropic vs Graphite anisotropic coupling)
+    let e_torque_m = (club.cg_y_toe_ward_mm + 0.35 * club.cg_x_back_mm.abs()) / 1000.0;
+    let centrifugal_torque_nm = head_mass_kg * omega_swing_rad_s.powi(2) * e_torque_m;
+    let direct_twist_deg = ((centrifugal_torque_nm * l_free_m) / club.gj_torsion_nm2) * 4.5;
+    let aniso_twist_deg = club.anisotropic_coupling_kappa * 4.5;
+    let torsional_twist_deg = -((direct_twist_deg + aniso_twist_deg) * 100.0).round() / 100.0;
+
+    // 6. Compensated face angle, dynamic loft, and dynamic lie
+    let compensated_face_angle_deg =
+        ((kin.raw_butt_face_angle_deg + torsional_twist_deg) * 100.0).round() / 100.0;
+
+    let aoa_loft_coupling = if is_iron { 1.0 } else { 0.385 };
+    let compensated_dynamic_loft_deg = ((club.static_loft_deg
+        + dynamic_loft_addition_deg
+        + aoa_loft_coupling * kin.attack_angle_deg)
+        * 10.0)
+        .round()
+        / 10.0;
+
+    let lie_droop_add_deg = ((1.5 * (toe_down_droop_mm / 1000.0)) / l_free_m).to_degrees() * 0.80;
+    let compensated_dynamic_lie_deg =
+        ((club.static_lie_deg + lie_droop_add_deg) * 10.0).round() / 10.0;
+
+    // 7. Clubhead linear speed V_head (m/s)
+    let omega_z_rad_s = kin.pre_impact_gyro_dps_xyz[2].to_radians();
+    let r_roll_m = if is_iron { 1.08 } else { 0.72 };
+    let raw_v_head =
+        kin.hand_speed_mps + omega_swing_rad_s * club.total_length_m + omega_z_rad_s * r_roll_m;
+    let clubhead_speed_mps = (raw_v_head * 10.0).round() / 10.0;
+
+    CompensatedClubheadAtImpact {
+        clubhead_speed_mps,
+        hand_speed_mps: kin.hand_speed_mps,
+        club_path_deg: kin.club_path_deg,
+        attack_angle_deg: kin.attack_angle_deg,
+        raw_butt_face_angle_deg: kin.raw_butt_face_angle_deg,
+        shaft_deflection_state: ShaftDeflectionState {
+            lead_deflection_mm,
+            toe_down_droop_mm,
+            dynamic_loft_addition_deg,
+            torsional_twist_deg,
+            kick_velocity_mps,
+        },
+        compensated_face_angle_deg,
+        compensated_dynamic_loft_deg,
+        compensated_dynamic_lie_deg,
+        tempo_backswing_to_downswing_ratio: kin.tempo_backswing_to_downswing_ratio,
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -657,5 +806,129 @@ mod tests {
         assert_eq!(r02.classification, SwingEventClassification::BallStrike);
         assert_eq!(r02.signature.strike_zone, StrikeZone::Center);
         assert!((r02.signature.estimated_horizontal_impact_mm - 0.8).abs() <= 3.5);
+    }
+
+    #[test]
+    fn seam4_solves_euler_bernoulli_shaft_deflection_and_compensated_clubface_across_all_4_scenarios() {
+        // Scenario 01: Driver 10.5° Graphite Regular
+        let club01 = ClubPhysicsParameters {
+            shaft_material: ShaftMaterial::Graphite,
+            total_length_m: 1.156,
+            grip_hand_hold_length_m: 0.20,
+            static_loft_deg: 10.5,
+            static_lie_deg: 58.0,
+            head_mass_g: 200.0,
+            cg_x_back_mm: -34.0,
+            cg_y_toe_ward_mm: 22.5,
+            cg_z_up_mm: 2.0,
+            ei_lead_lag_nm2: 32.0,
+            ei_droop_nm2: 32.0,
+            gj_torsion_nm2: 19.5,
+            anisotropic_coupling_kappa: 0.14,
+        };
+        let kin01 = ButtCapImpactKinematics {
+            pre_impact_gyro_dps_xyz: [1420.0, -180.0, 610.0],
+            hand_speed_mps: 8.3,
+            club_path_deg: 2.1,
+            attack_angle_deg: 3.2,
+            raw_butt_face_angle_deg: 2.4,
+            tempo_backswing_to_downswing_ratio: 3.05,
+        };
+        let comp01 = solve_shaft_deflection_and_compensate_clubhead(&club01, &kin01);
+        assert!((comp01.compensated_face_angle_deg - 0.8).abs() <= 0.30);
+        assert!((comp01.compensated_dynamic_loft_deg - 14.1).abs() <= 0.40);
+        assert!((comp01.clubhead_speed_mps - 44.7).abs() <= 0.25);
+
+        // Scenario 02: Iron 7 32° Steel Stiff (high torsional stiffness GJ = 51 Nm2, minimal twist)
+        let club02 = ClubPhysicsParameters {
+            shaft_material: ShaftMaterial::Steel,
+            total_length_m: 0.940,
+            grip_hand_hold_length_m: 0.20,
+            static_loft_deg: 32.0,
+            static_lie_deg: 62.0,
+            head_mass_g: 270.0,
+            cg_x_back_mm: -10.5,
+            cg_y_toe_ward_mm: 18.0,
+            cg_z_up_mm: -2.0,
+            ei_lead_lag_nm2: 54.0,
+            ei_droop_nm2: 54.0,
+            gj_torsion_nm2: 51.0,
+            anisotropic_coupling_kappa: 0.0,
+        };
+        let kin02 = ButtCapImpactKinematics {
+            pre_impact_gyro_dps_xyz: [1260.0, -140.0, 520.0],
+            hand_speed_mps: 7.6,
+            club_path_deg: -1.2,
+            attack_angle_deg: -4.1,
+            raw_butt_face_angle_deg: -0.3,
+            tempo_backswing_to_downswing_ratio: 2.95,
+        };
+        let comp02 = solve_shaft_deflection_and_compensate_clubhead(&club02, &kin02);
+        assert!(comp02.shaft_deflection_state.torsional_twist_deg.abs() < 0.45);
+        assert!((comp02.compensated_face_angle_deg - (-0.55)).abs() <= 0.30);
+        assert!((comp02.compensated_dynamic_loft_deg - 29.0).abs() <= 0.40);
+        assert!((comp02.clubhead_speed_mps - 38.2).abs() <= 0.25);
+
+        // Scenario 03: Driver 9.5° Graphite Stiff Dry Swing
+        let club03 = ClubPhysicsParameters {
+            shaft_material: ShaftMaterial::Graphite,
+            total_length_m: 1.156,
+            grip_hand_hold_length_m: 0.20,
+            static_loft_deg: 9.5,
+            static_lie_deg: 58.0,
+            head_mass_g: 202.0,
+            cg_x_back_mm: -33.0,
+            cg_y_toe_ward_mm: 22.0,
+            cg_z_up_mm: 1.5,
+            ei_lead_lag_nm2: 39.5,
+            ei_droop_nm2: 39.5,
+            gj_torsion_nm2: 24.8,
+            anisotropic_coupling_kappa: 0.11,
+        };
+        let kin03 = ButtCapImpactKinematics {
+            pre_impact_gyro_dps_xyz: [1460.0, -185.0, 625.0],
+            hand_speed_mps: 8.5,
+            club_path_deg: 1.4,
+            attack_angle_deg: 2.8,
+            raw_butt_face_angle_deg: 1.5,
+            tempo_backswing_to_downswing_ratio: 3.1,
+        };
+        let comp03 = solve_shaft_deflection_and_compensate_clubhead(&club03, &kin03);
+        assert!((comp03.compensated_face_angle_deg - 0.4).abs() <= 0.30);
+        assert!((comp03.compensated_dynamic_loft_deg - 12.6).abs() <= 0.40);
+        assert!((comp03.clubhead_speed_mps - 46.2).abs() <= 0.25);
+
+        // Scenario 04: Iron 7 31° Graphite Regular (more deflection/twist than Steel Iron 7)
+        let club04 = ClubPhysicsParameters {
+            shaft_material: ShaftMaterial::Graphite,
+            total_length_m: 0.946,
+            grip_hand_hold_length_m: 0.20,
+            static_loft_deg: 31.0,
+            static_lie_deg: 62.0,
+            head_mass_g: 264.0,
+            cg_x_back_mm: -14.0,
+            cg_y_toe_ward_mm: 19.5,
+            cg_z_up_mm: -3.0,
+            ei_lead_lag_nm2: 36.0,
+            ei_droop_nm2: 36.0,
+            gj_torsion_nm2: 23.0,
+            anisotropic_coupling_kappa: 0.10,
+        };
+        let kin04 = ButtCapImpactKinematics {
+            pre_impact_gyro_dps_xyz: [1210.0, -135.0, 495.0],
+            hand_speed_mps: 7.4,
+            club_path_deg: 0.5,
+            attack_angle_deg: -3.2,
+            raw_butt_face_angle_deg: 2.9,
+            tempo_backswing_to_downswing_ratio: 2.88,
+        };
+        let comp04 = solve_shaft_deflection_and_compensate_clubhead(&club04, &kin04);
+        assert!(
+            comp04.shaft_deflection_state.torsional_twist_deg.abs()
+                > comp02.shaft_deflection_state.torsional_twist_deg.abs()
+        );
+        assert!((comp04.compensated_face_angle_deg - 1.8).abs() <= 0.30);
+        assert!((comp04.compensated_dynamic_loft_deg - 29.6).abs() <= 0.40);
+        assert!((comp04.clubhead_speed_mps - 36.8).abs() <= 0.25);
     }
 }

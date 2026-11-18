@@ -4,7 +4,7 @@
 
 **Blocked by:** 02: GeoTrick IMU Decoder, 4-Bit Auto-ID Mount, 6-DoF Tare & ±16g Impact Clipping Signature (`imu-engine` Part 1)
 
-**Status:** ready-for-agent
+**Status:** resolved
 
-- [ ] Computes `lead_deflection_mm`, `toe_down_droop_mm`, `dynamic_loft_addition_deg`, `torsional_twist_deg`, and `kick_velocity_mps` from the `ClubProfile` physics parameters (`REQ-IMU-006`).
-- [ ] Produces `compensated_face_angle_deg` within $\pm 0.30^\circ$ and `compensated_dynamic_loft_deg` within $\pm 0.40^\circ$ across all 4 reference simulation fixtures (`REQ-ARCH-002`, `REQ-IMU-006`).
+- [x] Computes `lead_deflection_mm`, `toe_down_droop_mm`, `dynamic_loft_addition_deg`, `torsional_twist_deg`, and `kick_velocity_mps` from the `ClubProfile` physics parameters (`REQ-IMU-006`).
+- [x] Produces `compensated_face_angle_deg` within $\pm 0.30^\circ$ and `compensated_dynamic_loft_deg` within $\pm 0.40^\circ$ across all 4 reference simulation fixtures (`REQ-ARCH-002`, `REQ-IMU-006`).
