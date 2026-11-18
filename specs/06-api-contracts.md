@@ -46,16 +46,17 @@ Les messages échangés sur le bus WebSocket suivent une enveloppe JSON typée :
 
 ---
 
-## 3. Spécification de Restitution Client (`src/client-app` : Angular + Highcharts + Three.js)
+## 3. Spécification de Restitution Client Mobile (`src/client-app` : React Native JSI + Skia 120Hz + VisionCamera v4 + Three.js + On-Device Voice/Vision AI)
 
-1. **Vue Télémétrie (Highcharts Synchronisé sur $t = 0$)** :
-   - Curseur temporel vertical partagé avec le lecteur vidéo image par image ($t \in [-1200\text{ ms}, +300\text{ ms}]$).
+1. **Vue Télémétrie $120\text{ Hz}$ (React Native Skia & Victory Native XL Synchronisés sur $t = 0$)** :
+   - Curseur temporel vertical partagé à $120\text{ Hz}$ avec le lecteur vidéo image par image ($t \in [-1200\text{ ms}, +300\text{ ms}]$).
    - Courbe 1 : Vitesse tête de club compensée vs vitesse des mains (mise en évidence du *release* et du *kick* du shaft).
    - Courbe 2 : Déflexion du shaft en mm (*Lead/Lag* et *Toe-Down Droop*) + angle de torsion (*Twist* en degrés).
    - Courbe 3 : Signature d'impact à $1000\text{ Hz}$ (zoom sur $[-5\text{ ms}, +25\text{ ms}]$ montrant le plateau d'écrêtage à $16\,g$, le saut de torsion gyroscopique $\Delta \omega_z$ et le *ring-down* avec affichage graphique de la face de club et du point d'impact `Toe / Center / Heel`).
-2. **Scène 3D Interactive (Three.js / WebGL)** :
-   - Rendu du squelette 3D et du ruban du plan de swing (*Backswing* en bleu, *Downswing* en orange) recalé sur la vidéo (`dtl` ou `face_on`).
-   - Rendu 3D de la trajectoire de balle avec cône de dispersion, sommet (*apex*), point de chute (*carry*), roule (*roll*), et superposition en pointillés de la courbe comparative `tour_ball` lorsque l'utilisateur tape des balles de practice (`range_ball`).
+2. **Scène 3D Interactive (`@react-three/fiber` + `expo-gl` OpenGL ES / Metal) & Overlay Caméra Live (`VisionCamera v4` + `MediaPipe LiteRT`)** :
+   - En direct pendant la session : superposition GPU zéro-copie à $60\text{ FPS}$ du niveau à bulle virtuel, des repères au sol et du squelette 3D MediaPipe exécuté localement sur le NPU/GPU du smartphone.
+   - Interaction vocale locale en direct (`Sherpa-ONNX` / `Whisper.rn` STT + `Piper Neural TTS` embarqué) pour dialoguer hors-ligne avec le joueur ($< 150\text{ ms}$ de latence).
+   - Rendu 3D post-swing du squelette, du ruban du plan de swing (*Backswing* en bleu, *Downswing* en orange) et de la trajectoire de balle avec cône de dispersion, sommet (*apex*), point de chute (*carry*), roule (*roll*), et superposition en pointillés de la courbe comparative `tour_ball` lorsque l'utilisateur tape des balles de practice (`range_ball`).
 3. **Jauge de Batterie & Suivi d'Avancement de Charge du Capteur GeoTrick (`Battery & Charge Status Widget`)** :
    - **En session de jeu (`DISCHARGING`)** : affichage permanent dans l'en-tête de `client-app` du pourcentage de batterie (`battery_percent`), de la tension (`battery_mv`), du club actuellement détecté (`mount_slot_id`), de l'autonomie restante estimée en heures de jeu (`estimated_remaining_play_hours`) et d'une alerte visuelle/vocale dès que `battery_percent <= 15%`.
    - **En cours de recharge USB-C (`CHARGING_CC` / `CHARGING_CV` / `CHARGE_COMPLETE`)** : affichage d'une jauge animée d'avancement de la charge en temps réel ($0\% \rightarrow 100\%$), de la phase de charge (`Courant Constant 50 mA` puis `Finition Tension Constante 4.2 V`), du temps restant estimé en minutes (`estimated_minutes_to_full`), d'une notification lorsque la charge atteint $100\%$ (`CHARGE_COMPLETE`), et d'une alerte spécifique si le câble USB-C est branché alors que l'interrupteur physique `ESP101` est resté sur `OFF` (`SWITCH_OFF_DURING_CHARGE_WARNING`).

@@ -92,7 +92,7 @@ Afin d'éliminer toute ambiguïté entre les modules Rust (`imu-engine`, `ballis
 | `src/video-sync` | **TypeScript (Node.js 24)** + `ffmpeg` | Gestion de session v1 mono-smartphone (`dtl` ou `face_on`) extensible v2 `dual_camera`, calibration spatiale, détection du transitoire acoustique d'impact et alignement milliseconde sur l'`Impact Sync Anchor`. | `video-sync-session.schema.json` |
 | `src/bag-scanner` | **Python 3.11+** (PyTorch / MediaPipe / OpenCV / OCR) | Machine à états d'onboarding interactif guidé à la voix (TTS) + flux vidéo continu, reconnaissance club/shaft, résolution dans `ClubPhysicsCatalog`. | `bag-scanner.schema.json`, `club-profile.schema.json` |
 | `src/sim-harness` | **TypeScript / Rust CLI** | Exécuteur déterministe de scénarios `fixtures/simulation/*`, validation JSON Schema Draft 2020-12 et vérification des tolérances numériques en CI/CD. | `simulation-fixture.schema.json` |
-| `src/client-app` | **Angular + TypeScript + Three.js + Highcharts** | Interface mobile/web de capture guidée (niveau à bulle, repères visuels, consignes vocales), courbes de télémétrie Highcharts et visualisation 3D temps réel Three.js. | Tous les schémas `schemas/*.schema.json` |
+| `src/client-app` | **React Native (JSI C++ / TypeScript) + Skia 120Hz + VisionCamera v4 + Three.js (`@react-three/fiber`) + IA Locale On-Device (MediaPipe/LiteRT + Sherpa-ONNX/Whisper)** | Application mobile native Android & iOS ultra-fluide ($120\text{ Hz}$) exécutant en local les moteurs Rust (`.so`/`.a` FFI), la vision live $60\text{–}240\text{ FPS}$, l'interaction vocale STT/TTS hors-ligne, la jauge batterie/charge BLE et le rendu 3D. | Tous les schémas `schemas/*.schema.json` |
 
 ---
 
