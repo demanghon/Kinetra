@@ -4,7 +4,7 @@
 
 **Blocked by:** 01: Simulation Harness & JSON Schema Draft 2020-12 Contract Validator (`sim-harness`)
 
-**Status:** ready-for-agent
+**Status:** resolved
 
-- [ ] Drives the interactive local neural TTS (`Piper / Kokoro` via `Sherpa-ONNX`) + continuous video state machine (`WAIT_CLUB_HEAD` $\rightarrow$ `WAIT_SHAFT_LABEL` $\rightarrow$ `WAIT_MOUNT_CLIP` $\rightarrow$ `CLUB_SAVED`) in both `FULL_BAG_ONBOARDING` and `SINGLE_CLUB_UPDATE` modes (`REQ-BAG-001`, `REQ-BAG-007`).
-- [ ] Executes the 3-stage on-device vision pipeline (`YOLOv11n` ROI + Laplacian sharpness $\ge 0.70$, `PaddleOCR-v4`, `MobileNetV3-Small` `steel` vs `graphite`), triggers spoken guidance + 1-tap touch confirmation when any attribute confidence is $< 0.85$, binds the BLE `mount_slot_id` (`1..14`), and enriches the resulting `ClubProfile` via `ClubPhysicsCatalog` (`REQ-BAG-002` through `REQ-BAG-006`).
+- [x] Drives the interactive local neural TTS (`Piper / Kokoro` via `Sherpa-ONNX`) + continuous video state machine (`WAIT_CLUB_HEAD` $\rightarrow$ `WAIT_SHAFT_LABEL` $\rightarrow$ `WAIT_MOUNT_CLIP` $\rightarrow$ `CLUB_SAVED`) in both `FULL_BAG_ONBOARDING` and `SINGLE_CLUB_UPDATE` modes (`REQ-BAG-001`, `REQ-BAG-007`).
+- [x] Executes the 3-stage on-device vision pipeline (`YOLOv11n` ROI + Laplacian sharpness $\ge 0.70$, `PaddleOCR-v4`, `MobileNetV3-Small` `steel` vs `graphite`), triggers spoken guidance + 1-tap touch confirmation when any attribute confidence is $< 0.85$, binds the BLE `mount_slot_id` (`1..14`), and enriches the resulting `ClubProfile` via `ClubPhysicsCatalog` (`REQ-BAG-002` through `REQ-BAG-006`).
