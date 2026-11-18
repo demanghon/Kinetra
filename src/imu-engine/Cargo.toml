@@ -1,0 +1,10 @@
+[package]
+name = "imu-engine"
+version = "0.1.0"
+edition = "2024"
+description = "Kinetra GeoTrick IMU 6-DoF decoder, 4-bit Auto-ID mount resolver, 16g Impact Clipping Signature analyzer, and shaft deflection solver"
+
+[lib]
+name = "imu_engine"
+path = "src/lib.rs"
+crate-type = ["rlib", "cdylib"]

@@ -5,7 +5,7 @@
   "description": "Kinetra — Biomechanical & 3D Ballistic Golf Swing Analysis Platform (SDD)",
   "type": "module",
   "scripts": {
-    "test": "node --test src/sim-harness/sim-harness.test.ts",
+    "test": "cargo test --manifest-path src/imu-engine/Cargo.toml && node --test src/sim-harness/sim-harness.test.ts",
     "sim:verify": "node src/sim-harness/cli.ts"
   }
 }

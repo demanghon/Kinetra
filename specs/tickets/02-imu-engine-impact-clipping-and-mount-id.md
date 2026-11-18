@@ -4,9 +4,9 @@
 
 **Blocked by:** 01: Simulation Harness & JSON Schema Draft 2020-12 Contract Validator (`sim-harness`)
 
-**Status:** ready-for-agent
+**Status:** resolved
 
-- [ ] Decodes 24-byte BLE burst frames with CRC-8 verification, extracting `mount_slot_id` (`1..14`), `power_telemetry` (`50 mA` charge state, `battery_mv`, `battery_percent`, `estimated_minutes_to_full`), and 1000 Hz 6-DoF + PDM samples (`REQ-IMU-002`, `REQ-IMU-007`, `REQ-IMU-009`).
-- [ ] Computes the 6-DoF `Address Pose Tare` quaternion after $\ge 800\text{ ms}$ of stillness (`REQ-IMU-001`).
-- [ ] Distinguishes `ball_strike` from `dry_swing` via $\pm 16\,g$ clipping + `pdm_mic_rms` peak and subtracts shaft acoustic wave propagation time $\Delta t_{\text{wave}}$ (`REQ-IMU-003`, `REQ-IMU-004`).
-- [ ] Localizes horizontal face strike (`toe`, `center`, `heel`) and `estimated_horizontal_impact_mm` within $\pm 3.5\text{ mm}$ across all 4 simulation scenarios (`REQ-IMU-005`).
+- [x] Decodes 24-byte BLE burst frames with CRC-8 verification, extracting `mount_slot_id` (`1..14`), `power_telemetry` (`50 mA` charge state, `battery_mv`, `battery_percent`, `estimated_minutes_to_full`), and 1000 Hz 6-DoF + PDM samples (`REQ-IMU-002`, `REQ-IMU-007`, `REQ-IMU-009`).
+- [x] Computes the 6-DoF `Address Pose Tare` quaternion after $\ge 800\text{ ms}$ of stillness (`REQ-IMU-001`).
+- [x] Distinguishes `ball_strike` from `dry_swing` via $\pm 16\,g$ clipping + `pdm_mic_rms` peak and subtracts shaft acoustic wave propagation time $\Delta t_{\text{wave}}$ (`REQ-IMU-003`, `REQ-IMU-004`).
+- [x] Localizes horizontal face strike (`toe`, `center`, `heel`) and `estimated_horizontal_impact_mm` within $\pm 3.5\text{ mm}$ across all 4 simulation scenarios (`REQ-IMU-005`).
