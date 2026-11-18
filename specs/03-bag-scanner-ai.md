@@ -8,45 +8,53 @@
 
 ---
 
-## 1. Deux Modes d'Exécution : Scan Complet du Sac (`FULL_BAG_ONBOARDING`) & Mise à Jour Unitaire d'un Club (`SINGLE_CLUB_UPDATE`)
+## 1. Expérience Utilisateur : Guidage Vocal Naturel On-Device (`Sherpa-ONNX` + `Piper / Kokoro TTS`) & Reconnaissance Vidéo Continue
 
-Le module **`bag-scanner`** supporte deux modes d'invocation utilisant **exactement le même assistant interactif vocal (TTS) et vidéo en continu** :
+En v1, le module **`bag-scanner`** privilégie la simplicité et la fiabilité sur le terrain : **il ne nécessite pas de reconnaissance vocale (STT)**, mais guide le joueur par **des indications vocales naturelles générées 100 % en local sur le téléphone** (le même moteur vocal `VocalCoachService` étant réutilisé pendant l'entraînement pour donner des conseils après chaque swing) :
 
-1. **Mode Initialisation Complète (`FULL_BAG_ONBOARDING`)** :
-   Lors de la première configuration du sac, le joueur présente ses clubs l'un après l'autre devant la caméra et clipse le capteur sur l'embase de chaque club pour associer son `mount_slot_id` (`1..14`).
-2. **Mode Mise à Jour Unitaire Après Coup (`SINGLE_CLUB_UPDATE`)** :
-   Lorsqu'un joueur change un club dans son sac (ex. achat d'un nouveau Driver ou remplacement d'un Wedge), change de shaft, ou souhaite réassigner une embase **sans refaire tout son sac** :
-   - Il clipse simplement le capteur GeoTrick sur l'embase du club à modifier (ou sélectionne *"Modifier un club"*).
-   - Le capteur se réveille (`Wake-on-Use`), lit le `mount_slot_id` (ex. `Embase #1`) et l'envoie en BLE.
-   - L'assistant vocal démarre directement sur ce seul emplacement : *"Mise à jour du club sur l'embase numéro 1. Présentez la tête du nouveau club devant la caméra…"* puis met à jour uniquement ce `Club Profile` et se termine immédiatement !
+- **Moteur de Synthèse Vocale Neuronale Locale (`Sherpa-ONNX` C++ JSI)** :
+  - Modèle par défaut : **`Piper Neural TTS` — voix française `fr_FR-siwis-medium` (ou `fr_FR-upmc-medium`)** en format ONNX `int8` ($\sim 35\text{ Mo}$, latence $< 40\text{ ms}$ sur CPU ARM64, zéro connexion Internet).
+  - Modèle haute-fidélité interchangeable en configuration : **`Kokoro-82M` (`ff_siwis`)** ($\sim 85\text{ Mo}$).
+  - Architecture **Hybride Cache + Synthèse Dynamique** : les consignes récurrentes (*"Présentez la tête du club devant la caméra"*, *"Tournez maintenant le club pour montrer le manche"*, *"Clipsez le capteur en haut du grip"*) sont pré-cachées en mémoire ($0\text{ ms}$ de latence), tandis que les annonces spécifiques (*"Fer 7 Titleist T100 en acier Stiff associé à l'embase numéro 7"*) sont synthétisées à la volée avec la même voix.
+- **Flux Vidéo Continu ($30\text{ FPS}$, $\ge 1080\text{p}$) & Fallback Tactile Rapide** :
+  - Dès que le score de confiance franchit $\ge 0.85$, la machine à états passe toute seule à l'étape suivante avec un bip de validation et une annonce vocale.
+  - Si une étiquette est trop usée (`confidence < 0.85` après $6\text{ s}$), la voix l'indique et l'écran affiche **de larges boutons tactiles à 1 clic** (ex. `[Acier]` / `[Graphite]` et `[R]` / `[S]`) sans obliger le joueur à taper au clavier ni à parler dans le bruit d'un practice.
 
 ```mermaid
 stateDiagram-v2
     [*] --> SELECT_SCAN_SCOPE : Démarrage (FULL_BAG_ONBOARDING ou SINGLE_CLUB_UPDATE)
-    SELECT_SCAN_SCOPE --> WAIT_CLUB_HEAD : TTS "Présentez la tête du club devant la caméra"
-    WAIT_CLUB_HEAD --> SCANNING_HEAD : Détection boîte englobante tête de club (Sharpness >= 0.70)
-    SCANNING_HEAD --> WAIT_SHAFT_LABEL : Confiance Tête >= 0.85 (TTS "Fer 7 Titleist reconnu. Tournez le club et montrez les inscriptions du manche")
-    SCANNING_HEAD --> ASK_USER_HEAD : Timeout 6s ou Confiance < 0.85 (TTS "De quel club s'agit-il ?")
-    ASK_USER_HEAD --> WAIT_SHAFT_LABEL : Confirmation vocale ou tactile
-    WAIT_SHAFT_LABEL --> SCANNING_SHAFT : Détection tube du shaft + OCR/Vision
-    SCANNING_SHAFT --> WAIT_MOUNT_CLIP : Confiance Shaft/Flex >= 0.85 (TTS "Manche Acier Stiff détecté. Clipsez maintenant le capteur sur l'embase de ce club")
-    SCANNING_SHAFT --> ASK_USER_SHAFT : Timeout 6s ou Confiance < 0.85 (TTS "Est-ce un manche Acier ou Graphite, et quel est son flex ?")
-    ASK_USER_SHAFT --> WAIT_MOUNT_CLIP : Confirmation vocale ou tactile
+    SELECT_SCAN_SCOPE --> WAIT_CLUB_HEAD : TTS Local "Présentez la tête du club devant la caméra"
+    WAIT_CLUB_HEAD --> SCANNING_HEAD : YOLOv11n détecte club_head (Sharpness Laplacien >= 0.70)
+    SCANNING_HEAD --> WAIT_SHAFT_LABEL : Confiance Tête >= 0.85 (TTS "Fer 7 Titleist reconnu. Tournez le club et montrez le manche")
+    SCANNING_HEAD --> ASK_USER_HEAD : Timeout 6s ou Confiance < 0.85 (TTS + Boutons tactiles larges à l'écran)
+    ASK_USER_HEAD --> WAIT_SHAFT_LABEL : Sélection tactile 1-clic
+    WAIT_SHAFT_LABEL --> SCANNING_SHAFT : YOLOv11n + PaddleOCR-v4 + MobileNetV3 (Acier vs Graphite)
+    SCANNING_SHAFT --> WAIT_MOUNT_CLIP : Confiance Shaft/Flex >= 0.85 (TTS "Manche Acier Stiff détecté. Clipsez maintenant le capteur sur l'embase")
+    SCANNING_SHAFT --> ASK_USER_SHAFT : Timeout 6s ou Confiance < 0.85 (TTS + Boutons tactiles [Acier/Graphite] [L/A/R/S/X])
+    ASK_USER_SHAFT --> WAIT_MOUNT_CLIP : Sélection tactile 1-clic
     WAIT_MOUNT_CLIP --> RESOLVE_PHYSICS : Réception BLE mount_slot_id (1..14) (ou déjà clipsé en mode SINGLE_CLUB_UPDATE)
     RESOLVE_PHYSICS --> CLUB_SAVED : Enrichissement ClubPhysicsCatalog + Liaison Embase #k <-> ClubProfile
-    CLUB_SAVED --> WAIT_CLUB_HEAD : Si mode FULL_BAG_ONBOARDING ("Club lié à l'embase #k ! Passez au club suivant")
-    CLUB_SAVED --> [*] : Si mode SINGLE_CLUB_UPDATE ou commande vocale "Terminé"
+    CLUB_SAVED --> WAIT_CLUB_HEAD : Si mode FULL_BAG_ONBOARDING (TTS "Club lié à l'embase #k ! Passez au club suivant")
+    CLUB_SAVED --> [*] : Si mode SINGLE_CLUB_UPDATE ou bouton "Terminé"
 ```
 
 ---
 
-## 2. Pipeline d'Extraction Vision, OCR & Appairage d'Embase en 4 Étapes
+## 2. Les 3 Micro-Modèles de Vision Embarqués (On-Device `LiteRT / ONNX`, $< 15\text{ Mo}$ au total)
+
+Pour garantir une exécution fluide directement sur le smartphone (Android & iOS) sans serveur distant, l'analyse vidéo du `bag-scanner` repose sur 3 modèles quantifiés `int8` complémentaires :
+
+| Ordre | Modèle Embarqué (On-Device) | Taille | Rôle précis dans le pipeline `bag-scanner` |
+| :--- | :--- | :--- | :--- |
+| **1. Détecteur & Cadreur** | **`YOLOv11n` (`int8` TFLite / ONNX)** | $\sim 3.2\text{ Mo}$ | Tourne à $30\text{ FPS}$ pour isoler les boîtes englobantes `club_head`, `shaft_tube` et `shaft_label`, et calculer la netteté par variance du Laplacien (`sharpness_score >= 0.70`) uniquement sur le club avant de lancer l'OCR. |
+| **2. Lecteur OCR** | **`PaddleOCR-v4 Mobile` (ONNX `int8`) + `ML Kit / Apple Vision`** | $\sim 8.0\text{ Mo}$ | Lit les textes longitudinaux sur tubes cylindriques (`"Dynamic Gold S300"`, `"Ventus 5-R"`, `"Alta CB"`) et les gravures métalliques sur la tête (`"7"`, `"56°"`, `"9.5°"`, `"Titleist T100"`). |
+| **3. Classifieur Matériau** | **`MobileNetV3-Small` (`int8`) + Analyse de Spécularité** | $\sim 2.5\text{ Mo}$ | Distingue visuellement un manche **`steel`** (reflets métalliques chromés à fort gradient spéculaire et paliers *steps*) d'un manche **`graphite`** (réflexion diffuse mate/satinée ou trame carbone), même si l'inscription imprimée est effacée. |
 
 ### Étape 1 — Reconnaissance de la Tête de Club (`Head Inspection Stage`)
-- Identification de la catégorie (`driver`, `fairway_wood`, `hybrid`, `iron`, `wedge`, `putter`), de la latéralité (`right_handed` / `left_handed`), de la marque, du modèle et du numéro/loft gravé.
+- `YOLOv11n` + `PaddleOCR-v4` identifient la catégorie (`driver`, `fairway_wood`, `hybrid`, `iron`, `wedge`, `putter`), la latéralité (`right_handed` / `left_handed`), la marque, le modèle et le numéro/loft gravé.
 
 ### Étape 2 — Reconnaissance du Shaft & Matériau (`Shaft Inspection Stage`)
-- Classification visuelle de surface (`steel` vs `graphite`) + OCR des inscriptions du manche et normalisation du `flex_rating` (`L`, `A`, `R`, `S`, `X`).
+- Fusion du classifieur optique `MobileNetV3-Small` (`steel` vs `graphite`) et de l'OCR `PaddleOCR-v4` pour extraire le modèle de manche et normaliser le `flex_rating` (`L`, `A`, `R`, `S`, `X`).
 
 ### Étape 3 — Appairage Matériel de l'Embase (`Mount Slot Binding Stage`)
 - Si le capteur n'est pas encore clipsé sur le club en cours de scan, l'assistant vocal demande : *"Clipsez maintenant le capteur en haut du grip de ce club"*.

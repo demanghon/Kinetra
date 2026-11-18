@@ -60,6 +60,12 @@ Les messages échangés sur le bus WebSocket suivent une enveloppe JSON typée :
 3. **Jauge de Batterie & Suivi d'Avancement de Charge du Capteur GeoTrick (`Battery & Charge Status Widget`)** :
    - **En session de jeu (`DISCHARGING`)** : affichage permanent dans l'en-tête de `client-app` du pourcentage de batterie (`battery_percent`), de la tension (`battery_mv`), du club actuellement détecté (`mount_slot_id`), de l'autonomie restante estimée en heures de jeu (`estimated_remaining_play_hours`) et d'une alerte visuelle/vocale dès que `battery_percent <= 15%`.
    - **En cours de recharge USB-C (`CHARGING_CC` / `CHARGING_CV` / `CHARGE_COMPLETE`)** : affichage d'une jauge animée d'avancement de la charge en temps réel ($0\% \rightarrow 100\%$), de la phase de charge (`Courant Constant 50 mA` puis `Finition Tension Constante 4.2 V`), du temps restant estimé en minutes (`estimated_minutes_to_full`), d'une notification lorsque la charge atteint $100\%$ (`CHARGE_COMPLETE`), et d'une alerte spécifique si le câble USB-C est branché alors que l'interrupteur physique `ESP101` est resté sur `OFF` (`SWITCH_OFF_DURING_CHARGE_WARNING`).
+4. **Coach Vocal Naturel On-Device (`VocalCoachService` : `Sherpa-ONNX` + `Piper Neural TTS` / `Kokoro-82M`)** :
+   - Synthèse vocale neuronale française exécutée **100 % en local sur le téléphone** (sans reconnaissance vocale STT en v1 : communication unidirectionnelle Téléphone $\rightarrow$ Joueur, fluide et naturelle en $< 40\text{ ms}$).
+   - **Usages partagés** :
+     1. **Guidage d'onboarding du sac (`bag-scanner`)** : indique quand présenter la tête, quand tourner le manche, quand clipser le capteur sur l'embase et confirme à voix haute le club reconnu.
+     2. **Indications de session live** : annonce automatiquement le changement de club dès que le capteur est clipsé sur une nouvelle embase (*"Fer 7 sélectionné"*) et confirme le verrouillage de la posture d'adresse (*"Prêt"*).
+     3. **Conseils d'entraînement post-swing (`Training Feedback`)** : génère et énonce après chaque coup un diagnostic synthétique et un conseil actionnable basés sur les métriques mesurées (ex. vitesse tête de club, centrage `toe`/`center`/`heel`, angle de face compensé, chemin de club et *carry*).
 
 ---
 
@@ -85,3 +91,6 @@ Les messages échangés sur le bus WebSocket suivent une enveloppe JSON typée :
 
 ### `REQ-API-003` — Affichage Temps Réel de l'État Batterie & de l'Avancement de la Charge
 > **While** le capteur GeoTrick IMU est connecté en BLE (en session de swing ou branché sur son chargeur USB-C), **the system shall** afficher dans `client-app` le niveau de batterie (`battery_percent`, `battery_mv`), l'état du chargeur (`charging_state`), la barre de progression de la charge avec le décompte en minutes (`estimated_minutes_to_full`) jusqu'à $100\%$, ainsi qu'une alerte immédiate si `charging_state == "SWITCH_OFF_DURING_CHARGE_WARNING"` ou si `battery_percent <= 15.0`.
+
+### `REQ-API-004` — Synthèse Vocale Neuronale Locale (`VocalCoachService`) pour l'Onboarding et les Conseils d'Entraînement
+> **When** une étape du `bag-scanner` change d'état, qu'un changement d'embase de club (`mount_slot_id`) est détecté en BLE, ou que l'analyse d'un swing se termine pendant un entraînement, **the system shall** synthétiser et diffuser localement sur le smartphone (via `Sherpa-ONNX` avec le modèle neuronal français `Piper fr_FR-siwis-medium` ou `Kokoro-82M`, sans accès réseau ni STT) l'indication sonore ou le conseil biomécanique/balistique correspondant en moins de $80\text{ ms}$.
