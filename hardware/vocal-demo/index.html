@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <title>Kinetra — Démo Interactive du Coach Vocal Local (Piper Neural TTS fr_FR-siwis-medium)</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 32px;
+      background: #0b1120;
+      color: #f8fafc;
+      font-family: system-ui, -apple-system, sans-serif;
+    }
+    .container { max-width: 960px; margin: 0 auto; }
+    h1 { color: #38bdf8; margin-bottom: 6px; }
+    .subtitle { color: #94a3b8; font-size: 14px; margin-bottom: 24px; }
+    .card {
+      background: #111827;
+      border: 1px solid #1e293b;
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 18px;
+    }
+    .badge {
+      display: inline-block;
+      padding: 4px 10px;
+      border-radius: 6px;
+      font-size: 12px;
+      font-weight: 700;
+      background: #0284c7;
+      color: #fff;
+      margin-bottom: 8px;
+    }
+    .quote {
+      font-size: 17px;
+      font-weight: 600;
+      color: #e2e8f0;
+      margin: 12px 0;
+      line-height: 1.45;
+    }
+    .metrics {
+      font-size: 13px;
+      color: #34d399;
+      background: #1e293b;
+      padding: 8px 12px;
+      border-radius: 6px;
+      margin-bottom: 12px;
+    }
+    audio { width: 100%; margin-top: 6px; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>KINETRA — Démo du Moteur Vocal Local (Piper Neural TTS)</h1>
+    <div class="subtitle">
+      Modèle neuronal embarqué : <b>fr_FR-siwis-medium.onnx</b> (100% Hors-Ligne, vitesse ~10× temps réel sur CPU, zéro serveur requis)
+    </div>
+
+    <div class="card">
+      <span class="badge">SCÈNE 1/5 — ONBOARDING DU SAC (BAG SCANNER)</span>
+      <div class="metrics">YOLOv11n + PaddleOCR-v4 + MobileNetV3 : Tête Titleist T100 (94%) | Manche Acier Stiff (95%)</div>
+      <div class="quote">« Fer 7 Titleist T 100 reconnu. Tournez maintenant le club et montrez les inscriptions du manche. Manche Acier Stiff détecté. Clipsez maintenant le capteur sur l'embase de ce club. »</div>
+      <audio controls src="vocal_01_bag_scanner.wav"></audio>
+    </div>
+
+    <div class="card">
+      <span class="badge" style="background:#ca8a04;">SCÈNE 2/5 — ÉTALONNAGE GRAVITAIRE DE L'EMBASE (REQ-IMU-010)</span>
+      <div class="metrics">Détection d'une embase collée à +22,5° (>12°) puis validation après repositionnement (+3,2°)</div>
+      <div class="quote">« Attention, l'embase numéro 7 est décalée de 22 degrés vers la droite. Décollez-la maintenant et réalignez la flèche face avec le bord d'attaque du club. Embase numéro 7 étalonnée avec succès, correction permanente de 3,2 degrés enregistrée. »</div>
+      <audio controls src="vocal_02_mount_calibration.wav"></audio>
+    </div>
+
+    <div class="card">
+      <span class="badge" style="background:#059669;">SCÈNE 3/5 — CHANGEMENT AUTOMATIQUE DE CLUB (AUTO-ID 4-BITS)</span>
+      <div class="metrics">Réveil Wake-on-Use + Lecture GPIO (D3..D0) = 1011 -> Embase #4</div>
+      <div class="quote">« Fer 7 Ping G 430, manche graphite Regular sélectionné. Prêt à swinguer. »</div>
+      <audio controls src="vocal_03_auto_club_switch.wav"></audio>
+    </div>
+
+    <div class="card">
+      <span class="badge" style="background:#dc2626;">SCÈNE 4/5 — COACH D'ENTRAÎNEMENT : FRAPPE EN POINTE (-14 mm)</span>
+      <div class="metrics">Impact Clipping Signature : Saturation ±16g (3,0 ms) + Impulsion Gyro axiale Δωz = -245°/s</div>
+      <div class="quote">« Portée 129 mètres. Impact décentré de 14 millimètres en pointe avec une face ouverte de 1,8 degré. Gardez votre posture et vos bras plus proches du corps à la descente. »</div>
+      <audio controls src="vocal_04_coach_toe_strike.wav"></audio>
+    </div>
+
+    <div class="card">
+      <span class="badge" style="background:#7c3aed;">SCÈNE 5/5 — COACH D'ENTRAÎNEMENT : PLEIN CENTRE & BALLE DE PRACTICE</span>
+      <div class="metrics">Vitesse club : 161 km/h | Conversion automatique Balle de Practice (136 m) -> Pro V1 (150 m)</div>
+      <div class="quote">« Excellent contact plein centre à 161 kilomètres heure ! Portée 136 mètres en balle de practice, soit 150 mètres avec une balle de parcours. »</div>
+      <audio controls src="vocal_05_coach_center_range_ball.wav"></audio>
+    </div>
+  </div>
+</body>
+</html>
