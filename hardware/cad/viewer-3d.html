@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
   <meta charset="UTF-8" />
-  <title>Kinetra — Visualiseur CAO 3D Interactif (Boîtier XIAO & Embase Non-Destructive)</title>
+  <title>Kinetra — Animation & Visualiseur 3D (Clipsage Snap-Fit + Aimants + Flèche d'Alignement FACE)</title>
   <style>
     body {
       margin: 0;
@@ -14,7 +14,7 @@
       overflow: hidden;
     }
     #sidebar {
-      width: 360px;
+      width: 390px;
       background: #111827;
       border-right: 1px solid #1e293b;
       padding: 20px;
@@ -28,170 +28,209 @@
       margin-bottom: 14px;
     }
     label { display: block; font-size: 13px; margin-bottom: 6px; color: #cbd5e1; }
-    input[type="range"], select { width: 100%; }
+    input[type="range"], select, button { width: 100%; }
+    button {
+      background: #0284c7;
+      color: white;
+      border: none;
+      padding: 10px;
+      border-radius: 6px;
+      font-weight: 600;
+      cursor: pointer;
+      margin-bottom: 8px;
+    }
+    button:hover { background: #0369a1; }
     .badge {
       display: inline-block;
       padding: 3px 8px;
       border-radius: 4px;
-      background: #0284c7;
+      background: #059669;
       font-size: 12px;
       font-weight: 600;
     }
     #canvas-container { flex: 1; position: relative; }
-    canvas { width: 100%; height: 100%; display: block; cursor: grab; }
-    canvas:active { cursor: grabbing; }
-    .legend-item { font-size: 12px; margin: 6px 0; display: flex; align-items: center; gap: 8px; }
-    .swatch { width: 12px; height: 12px; border-radius: 3px; display: inline-block; }
+    canvas { width: 100%; height: 100%; display: block; }
   </style>
 </head>
 <body>
   <div id="sidebar">
-    <h1>KINETRA — Visualiseur CAO 3D</h1>
-    <p style="font-size: 12px; color: #94a3b8;">
-      Faites glisser la souris pour tourner en 3D autour du boîtier capteur XIAO BLE et de l'embase non-destructive.
-    </p>
-
+    <h1>KINETRA — Cinématique de Montage & Alignement</h1>
     <div class="control-group">
-      <label>Vue Éclatée (Assemblé ↔ Éclaté) : <span id="explode-val" class="badge">65%</span></label>
-      <input id="explode" type="range" min="0" max="100" value="65" />
+      <button id="play-btn">⏸ Pause Animation de Montage</button>
+      <label>Progression du Montage : <span id="phase-badge" class="badge">En cours</span></label>
+      <input id="timeline" type="range" min="0" max="100" value="0" />
     </div>
 
     <div class="control-group">
-      <label>Inclinaison Caméra (Pitch) :</label>
-      <input id="pitch" type="range" min="10" max="75" value="32" />
+      <label>1. Comment l'embase s'aligne sur le club :</label>
+      <p style="font-size:12px; color:#fde047; margin:4px 0;">
+        ▲ Une grosse flèche en relief « ▲ FACE » dépasse à l'avant de l'embase ET du capteur. Au moment de coller le double-face 3M VHB, vous alignez cette pointe avec le trait central du grip et le bord d'attaque (leading edge) de la face du club.
+      </p>
     </div>
 
     <div class="control-group">
-      <label>Simuler le Câblage d'Embase (Slot 1..14) :</label>
-      <select id="slot-select">
-        <option value="1">Embase #1 — Driver 1W (Code 1110)</option>
-        <option value="2">Embase #2 — Bois 3W (Code 1101)</option>
-        <option value="4">Embase #4 — Fer 5I (Code 1011)</option>
-        <option value="7" selected>Embase #7 — Fer 7I (Code 1000)</option>
-        <option value="14">Embase #14 — Putter (Code 0001)</option>
-      </select>
-      <div id="wiring-info" style="margin-top:8px; font-size:12px; color:#34d399;"></div>
-    </div>
-
-    <div class="control-group">
-      <label>Nomenclature 3D (Échelle 1:1 en mm)</label>
-      <div class="legend-item"><span class="swatch" style="background:#38bdf8;"></span>Capot Boîtier XIAO (Ø32×11.5 mm, PETG-CF)</div>
-      <div class="legend-item"><span class="swatch" style="background:#10b981;"></span>Carte Seeed XIAO BLE nRF52840 (21×17.5 mm)</div>
-      <div class="legend-item"><span class="swatch" style="background:#f59e0b;"></span>Accu LiPo 85mAh L301525 (30×15×2.5 mm)</div>
-      <div class="legend-item"><span class="swatch" style="background:#facc15;"></span>Embase Puits en D + Pogo Magnétique 5 pins</div>
-      <div class="legend-item"><span class="swatch" style="background:#ef4444;"></span>Rondelle 3M VHB Ø25mm + Pion Lisse Ø3.8mm</div>
+      <label>2. Comment le capteur se clipse sur l'embase :</label>
+      <p style="font-size:12px; color:#cbd5e1; margin:4px 0;">
+        • <b>Guidage en « D » asymétrique :</b> le capteur ne peut entrer que dans 1 seul sens.<br/>
+        • <b>Attraction magnétique (2 aimants N52 violets) :</b> aspire le capteur au fond du puits.<br/>
+        • <b>Clipsage mécanique (2 bras Snap-Fit verts) :</b> les 2 pattes latérales s'écartent puis se verrouillent sous les ergots bleus de l'embase (« CLIC ! »). Pour retirer le capteur, il suffit de pincer le haut des 2 pattes entre le pouce et l'index.
+      </p>
     </div>
   </div>
   <div id="canvas-container">
-    <canvas id="cad-canvas"></canvas>
+    <canvas id="anim-canvas"></canvas>
   </div>
 
   <script>
-    const canvas = document.getElementById("cad-canvas");
+    const canvas = document.getElementById("anim-canvas");
     const ctx = canvas.getContext("2d");
-    const explodeSlider = document.getElementById("explode");
-    const pitchSlider = document.getElementById("pitch");
-    const slotSelect = document.getElementById("slot-select");
-    const wiringInfo = document.getElementById("wiring-info");
+    const timeline = document.getElementById("timeline");
+    const playBtn = document.getElementById("play-btn");
+    const phaseBadge = document.getElementById("phase-badge");
 
-    let yaw = -0.65;
-    let isDragging = false;
-    let lastX = 0;
+    let playing = true;
+    let tNorm = 0;
 
-    canvas.addEventListener("mousedown", (e) => { isDragging = true; lastX = e.clientX; });
-    window.addEventListener("mouseup", () => { isDragging = false; });
-    window.addEventListener("mousemove", (e) => {
-      if (!isDragging) return;
-      yaw += (e.clientX - lastX) * 0.01;
-      lastX = e.clientX;
-      render();
+    playBtn.addEventListener("click", () => {
+      playing = !playing;
+      playBtn.textContent = playing ? "⏸ Pause Animation de Montage" : "▶ Jouer l'Animation de Montage";
     });
-    explodeSlider.addEventListener("input", render);
-    pitchSlider.addEventListener("input", render);
-    slotSelect.addEventListener("change", render);
-    window.addEventListener("resize", render);
+    timeline.addEventListener("input", () => {
+      playing = false;
+      playBtn.textContent = "▶ Jouer l'Animation de Montage";
+      tNorm = Number(timeline.value) / 100;
+      draw();
+    });
 
-    function project(x, y, z, cx, cy, scale, pitch) {
-      const x1 = x * Math.cos(yaw) - y * Math.sin(yaw);
-      const y1 = x * Math.sin(yaw) + y * Math.cos(yaw);
-      return [
-        cx + x1 * scale,
-        cy + (y1 * Math.sin(pitch) - z * Math.cos(pitch)) * scale
-      ];
-    }
-
-    function drawCyl(rBot, rTop, z0, z1, cx, cy, scale, pitch, fillTop, fillSide, stroke, dFlat = null) {
-      const segs = 48;
-      const bot = [], top = [];
-      for (let i = 0; i < segs; i++) {
-        const a = (2 * Math.PI * i) / segs;
-        let xb = rBot * Math.cos(a), yb = rBot * Math.sin(a);
-        let xt = rTop * Math.cos(a), yt = rTop * Math.sin(a);
-        if (dFlat !== null) { yb = Math.min(yb, dFlat); yt = Math.min(yt, dFlat); }
-        bot.push(project(xb, yb, z0, cx, cy, scale, pitch));
-        top.push(project(xt, yt, z1, cx, cy, scale, pitch));
-      }
-      ctx.fillStyle = fillSide;
-      ctx.strokeStyle = stroke;
-      for (let i = 0; i < segs; i++) {
-        const nxt = (i + 1) % segs;
-        ctx.beginPath();
-        ctx.moveTo(bot[i][0], bot[i][1]);
-        ctx.lineTo(bot[nxt][0], bot[nxt][1]);
-        ctx.lineTo(top[nxt][0], top[nxt][1]);
-        ctx.lineTo(top[i][0], top[i][1]);
-        ctx.closePath();
-        ctx.fill();
-      }
-      ctx.fillStyle = fillTop;
-      ctx.beginPath();
-      top.forEach((p, idx) => idx === 0 ? ctx.moveTo(p[0], p[1]) : ctx.lineTo(p[0], p[1]));
-      ctx.closePath();
-      ctx.fill();
-      ctx.stroke();
-    }
-
-    function render() {
+    function draw() {
       canvas.width = canvas.clientWidth;
       canvas.height = canvas.clientHeight;
-      const cx = canvas.width / 2;
-      const cy = canvas.height * 0.68;
-      const scale = Math.min(canvas.width, canvas.height) / 68;
-      const explode = Number(explodeSlider.value) / 100;
-      document.getElementById("explode-val").textContent = `${explodeSlider.value}%`;
-      const pitch = (Number(pitchSlider.value) * Math.PI) / 180;
+      const w = canvas.width;
+      const h = canvas.height;
+      ctx.fillStyle = "#0b1120";
+      ctx.fillRect(0, 0, w, h);
 
-      const slot = Number(slotSelect.value);
-      const code = (15 - slot).toString(2).padStart(4, "0");
-      wiringInfo.textContent = `Code binaire lu sur (D3..D0) = ${code} -> Club #${slot} auto-sélectionné`;
+      let mountDrop = 0, podDrop = 0, clipFlex = 0, pogoComp = 0, locked = false;
+      if (tNorm < 0.25) {
+        phaseBadge.textContent = "1/4 Pose Embase sur Grip";
+        mountDrop = (1 - tNorm / 0.25) * 80;
+        podDrop = 160;
+      } else if (tNorm < 0.60) {
+        phaseBadge.textContent = "2/4 Approche Capteur (Détrompeur D)";
+        const p = (tNorm - 0.25) / 0.35;
+        podDrop = (1 - p) * 145 + 15;
+      } else if (tNorm < 0.82) {
+        phaseBadge.textContent = "3/4 Clipsage Snap-Fit + Aimants";
+        const p = (tNorm - 0.60) / 0.22;
+        podDrop = (1 - p) * 15;
+        clipFlex = Math.sin(p * Math.PI) * 18;
+        pogoComp = p * 8;
+        locked = p > 0.85;
+      } else {
+        phaseBadge.textContent = "4/4 VERROUILLÉ (CLIC !)";
+        pogoComp = 8;
+        locked = true;
+      }
 
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      const cx = w * 0.34;
+      const gripY = h * 0.74;
 
-      // 1. Grip Top
-      drawCyl(13.5, 13.0, -18, -6, cx, cy, scale, pitch, "#334155", "#1e293b", "#64748b");
-      // 2. Smooth Pin + 3M VHB Pad
-      const zVhb = -5 + explode * 6;
-      drawCyl(1.9, 1.9, zVhb - 9, zVhb, cx, cy, scale, pitch, "#38bdf8", "#0284c7", "#7dd3fc");
-      drawCyl(12.5, 12.5, zVhb, zVhb + 0.6, cx, cy, scale, pitch, "#ef4444", "#b91c1c", "#fca5a5");
-      // 3. Keyed Mount
-      const zMount = zVhb + 1 + explode * 7;
-      drawCyl(13.0, 12.0, zMount, zMount + 6.2, cx, cy, scale, pitch, "#475569", "#1e293b", "#38bdf8");
-      drawCyl(9.0, 9.0, zMount + 5.9, zMount + 6.3, cx, cy, scale, pitch, "#0f172a", "#0f172a", "#facc15", 7.0);
-      // 4. Male D-Plug
-      const zPlug = zMount + 3.0 + explode * 12;
-      drawCyl(8.9, 8.9, zPlug, zPlug + 3.4, cx, cy, scale, pitch, "#64748b", "#334155", "#94a3b8", 6.9);
-      // 5. LiPo L301525
-      const zLipo = zPlug + 4.0 + explode * 8;
-      drawCyl(13.0, 13.0, zLipo, zLipo + 2.5, cx, cy, scale, pitch, "#f59e0b", "#d97706", "#fde68a");
-      // 6. XIAO BLE nRF52840 Sense
-      const zXiao = zLipo + 3.0 + explode * 8;
-      drawCyl(10.5, 10.5, zXiao, zXiao + 3.2, cx, cy, scale, pitch, "#10b981", "#059669", "#a7f3d0");
-      // 7. Top Housing Cap
-      const zCap = zXiao + 3.5 + explode * 9;
-      drawCyl(16.0, 14.5, zCap, zCap + 7.5, cx, cy, scale, pitch, "#1e293b", "#0f172a", "#38bdf8");
+      // Grip
+      ctx.fillStyle = "#334155";
+      ctx.fillRect(cx - 140, gripY, 118, 120);
+      ctx.fillRect(cx + 22, gripY, 118, 120);
+
+      // Mount + Smooth Pin + 3M VHB
+      const my = gripY - mountDrop;
+      ctx.fillStyle = "#ef4444";
+      ctx.fillRect(cx - 130, my - 7, 108, 7);
+      ctx.fillRect(cx + 22, my - 7, 108, 7);
+
+      ctx.fillStyle = "#0ea5e9";
+      ctx.fillRect(cx - 18, my - 7, 36, 82);
+
+      const mTop = my - 72;
+      ctx.fillStyle = "#475569";
+      ctx.fillRect(cx - 135, my - 35, 270, 28);
+      ctx.fillRect(cx - 135, mTop, 42, 37);
+      ctx.fillRect(cx + 93, mTop, 42, 37);
+
+      // Lateral blue locking lugs on Mount
+      ctx.fillStyle = "#38bdf8";
+      ctx.fillRect(cx - 152, mTop + 10, 17, 20);
+      ctx.fillRect(cx + 135, mTop + 10, 17, 20);
+
+      // Gold pogo pads
+      ctx.fillStyle = "#facc15";
+      for (let i = -2; i <= 2; i++) {
+        ctx.fillRect(cx + i * 20 - 6, my - 40, 12, 6);
+      }
+
+      // Sensor Pod
+      const py = mTop - podDrop;
+      const pTop = py - 95;
+      ctx.fillStyle = "#1e293b";
+      ctx.strokeStyle = "#38bdf8";
+      ctx.lineWidth = 2;
+      ctx.fillRect(cx - 150, pTop, 300, 95);
+      ctx.strokeRect(cx - 150, pTop, 300, 95);
+      ctx.fillStyle = "#64748b";
+      ctx.fillRect(cx - 90, py, 180, 32);
+
+      // Pogo plungers
+      ctx.fillStyle = "#facc15";
+      for (let i = -2; i <= 2; i++) {
+        ctx.fillRect(cx + i * 20 - 3, py + 24, 6, 14 - pogoComp);
+      }
+
+      // Left & Right Snap-Fit Arms
+      ctx.fillStyle = locked ? "#10b981" : "#38bdf8";
+      ctx.fillRect(cx - 164 - clipFlex, pTop + 20, 12, 118);
+      ctx.fillRect(cx - 152 - clipFlex, py + 32, 18, 12);
+      ctx.fillRect(cx + 152 + clipFlex, pTop + 20, 12, 118);
+      ctx.fillRect(cx + 134 + clipFlex, py + 32, 18, 12);
+
+      // Top-down view on the right side
+      const rcx = w * 0.78;
+      const rcy = h * 0.52;
+      ctx.strokeStyle = "#38bdf8";
+      ctx.beginPath();
+      ctx.moveTo(rcx, rcy - 190);
+      ctx.lineTo(rcx, rcy + 170);
+      ctx.stroke();
+
+      ctx.fillStyle = "#334155";
+      ctx.beginPath();
+      ctx.arc(rcx, rcy, 120, 0, Math.PI * 2);
+      ctx.fill();
+
+      ctx.fillStyle = "#475569";
+      ctx.beginPath();
+      ctx.arc(rcx, rcy, 98, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Prominent Yellow Arrow ▲ FACE on Mount
+      ctx.fillStyle = "#facc15";
+      ctx.beginPath();
+      ctx.moveTo(rcx, rcy - 125);
+      ctx.lineTo(rcx - 22, rcy - 88);
+      ctx.lineTo(rcx + 22, rcy - 88);
+      ctx.closePath();
+      ctx.fill();
+      ctx.fillText("▲ FLECHE 'FACE' (Alignée avec le bord d'attaque du club)", rcx - 135, rcy - 140);
     }
 
-    render();
+    function tick() {
+      if (playing) {
+        tNorm += 0.004;
+        if (tNorm > 1) tNorm = 0;
+        timeline.value = String(Math.round(tNorm * 100));
+        draw();
+      }
+      requestAnimationFrame(tick);
+    }
+    window.addEventListener("resize", draw);
+    tick();
   </script>
 </body>
 </html>

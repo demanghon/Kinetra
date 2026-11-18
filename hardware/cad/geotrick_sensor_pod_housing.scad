@@ -51,6 +51,20 @@ module geotrick_sensor_pod_housing() {
             translate([0, 0, -d_plug_height_mm])
                 linear_extrude(height = d_plug_height_mm)
                     d_plug_2d(d_plug_diameter_mm, d_plug_flat_offset_mm);
+            // 3. Prominent 3D raised '▲ FACE' alignment sight rib & arrow on top cap (+Y)
+            translate([-1.0, 0, pod_total_height_mm])
+                cube([2.0, pod_outer_width_mm/2, 0.8]);
+            translate([0, pod_outer_width_mm/2 + 1.2, pod_total_height_mm - 0.5])
+                cylinder(d = 6.8, h = 1.3, $fn = 3);
+            // 4. Two resilient lateral Snap-Fit locking arms (-X and +X) with inward hooks and top finger release tabs
+            translate([-pod_outer_length_mm/2 - 1.8, -4.0, -3.8])
+                cube([2.0, 8.0, 10.3]);
+            translate([-pod_outer_length_mm/2 + 0.2, -3.5, -3.8])
+                cube([1.6, 7.0, 1.6]); // Left inward snap hook
+            translate([+pod_outer_length_mm/2 - 0.2, -4.0, -3.8])
+                cube([2.0, 8.0, 10.3]);
+            translate([+pod_outer_length_mm/2 - 1.8, -3.5, -3.8])
+                cube([1.6, 7.0, 1.6]); // Right inward snap hook
         }
 
         // 3. Lower cradle for L301525 LiPo battery (30 x 15 x 2.5 mm + 0.5mm VHB cushion)

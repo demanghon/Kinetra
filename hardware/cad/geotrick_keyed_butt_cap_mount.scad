@@ -45,6 +45,14 @@ module keyed_magnetic_butt_cap_mount() {
             cylinder(d1 = flange_diameter_mm, d2 = flange_diameter_mm - 2.0, h = flange_height_mm);
             // 2. Smooth rounded centering pin for the factory grip vent hole
             smooth_vent_centering_pin();
+            // 3. Prominent 3D raised '▲ FACE' alignment arrow protruding at +Y (towards clubface leading edge)
+            translate([0, flange_diameter_mm/2 - 1.5, 0])
+                cylinder(d = 6.4, h = flange_height_mm + 0.6, $fn = 3);
+            // 4. Two lateral Snap-Fit locking lugs (-X and +X) for the sensor pod's side clips
+            translate([-flange_diameter_mm/2 - 1.2, -3.5, 1.5])
+                cube([2.0, 7.0, 3.0]);
+            translate([+flange_diameter_mm/2 - 0.8, -3.5, 1.5])
+                cube([2.0, 7.0, 3.0]);
         }
 
         // 3. Asymmetric D-keyed female socket on top
