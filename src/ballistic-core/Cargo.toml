@@ -1,0 +1,10 @@
+[package]
+name = "ballistic-core"
+version = "0.1.0"
+edition = "2024"
+description = "Kinetra 3D aerodynamic ballistic integrator (RK4 6-DOF Magnus), hybrid IMU+DTL fusion, tour_ball vs range_ball profiler, and Dry Swing simulator"
+
+[lib]
+name = "ballistic_core"
+path = "src/lib.rs"
+crate-type = ["rlib", "cdylib"]
