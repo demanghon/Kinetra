@@ -4,9 +4,9 @@
 
 **Blocked by:** 06: 3D Ballistic Integrator (RK4 6-DOF Magnus), Hybrid Fusion, `tour_ball` vs `range_ball` & `Dry Swing` (`ballistic-core`), 07: On-Device Vision (`YOLOv11n` + `PaddleOCR-v4` + `MobileNetV3`) & Local Neural TTS (`Piper / Kokoro`) Bag Scanner + Single-Club Update (`bag-scanner`)
 
-**Status:** ready-for-agent
+**Status:** resolved
 
-- [ ] Integrates native Rust FFI (`imu-engine`, `ballistic-core`), BLE (`react-native-ble-plx`), zero-copy $60\text{–}240\text{ FPS}$ camera (`react-native-vision-camera` v4), and on-device `MediaPipe Pose Landmarker 3D` + `YOLOv11n` on Android and iOS ([ADR-0005](../../docs/adr/0005-react-native-jsi-skia-and-on-device-edge-ai.md)).
-- [ ] Implements `VocalCoachService` (`Sherpa-ONNX` + `Piper / Kokoro-82M` local French neural TTS) for bag-scanner voice guidance, automatic club-switch announcements, and actionable post-swing training tips (`REQ-API-004`).
-- [ ] Displays real-time sensor battery level, remaining play hours, live charging progress (`0%` to `100%` with `estimated_minutes_to_full`), and `SWITCH_OFF_DURING_CHARGE_WARNING` alert (`REQ-API-003`).
-- [ ] Synchronizes the video player, $120\text{ Hz}$ Skia telemetry curves (speed, shaft deflection, $\pm 16\,g$ clipping & $\Delta \omega_z$ face strike map), and 3D flight scene (`@react-three/fiber`) within $\le 1\text{ frame}$ around $t = 0$ (`REQ-API-002`).
+- [x] Integrates native Rust FFI (`imu-engine`, `ballistic-core`), BLE (`react-native-ble-plx`), zero-copy $60\text{–}240\text{ FPS}$ camera (`react-native-vision-camera` v4), and on-device `MediaPipe Pose Landmarker 3D` + `YOLOv11n` on Android and iOS ([ADR-0005](../../docs/adr/0005-react-native-jsi-skia-and-on-device-edge-ai.md)).
+- [x] Implements `VocalCoachService` (`Sherpa-ONNX` + `Piper / Kokoro-82M` local French neural TTS) for bag-scanner voice guidance, automatic club-switch announcements, and actionable post-swing training tips (`REQ-API-004`).
+- [x] Displays real-time sensor battery level, remaining play hours, live charging progress (`0%` to `100%` with `estimated_minutes_to_full`), and `SWITCH_OFF_DURING_CHARGE_WARNING` alert (`REQ-API-003`).
+- [x] Synchronizes the video player, $120\text{ Hz}$ Skia telemetry curves (speed, shaft deflection, $\pm 16\,g$ clipping & $\Delta \omega_z$ face strike map), and 3D flight scene (`@react-three/fiber`) within $\le 1\text{ frame}$ around $t = 0$ (`REQ-API-002`).
