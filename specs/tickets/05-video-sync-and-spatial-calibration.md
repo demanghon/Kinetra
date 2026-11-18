@@ -4,8 +4,8 @@
 
 **Blocked by:** 02: GeoTrick IMU Decoder, 4-Bit Auto-ID Mount, 6-DoF Tare & ±16g Impact Clipping Signature (`imu-engine` Part 1)
 
-**Status:** ready-for-agent
+**Status:** resolved
 
-- [ ] Enforces virtual spirit level ($|\text{roll}| \le 1.0^\circ$, $|\text{pitch}| \le 3.0^\circ$) and target-line lock before enabling swing capture (`REQ-SYNC-001`, `REQ-SYNC-002`).
-- [ ] Aligns `ball_strike` captures to $t = 0$ within $\pm 1.5\text{ ms}$ by subtracting acoustic time-of-flight $d_{\text{cam}}/c_{\text{air}}$, and aligns `dry_swing` captures via *Low Point* angular velocity correlation within $\pm 6.0\text{ ms}$ (`REQ-SYNC-003`, `REQ-SYNC-004`).
-- [ ] Outputs validated `VideoSyncSession` payloads including `dtl_launch_window` (in `dtl` mode) and `pose_kinematics_summary` (`REQ-SYNC-005`, `REQ-SYNC-006`).
+- [x] Enforces virtual spirit level ($|\text{roll}| \le 1.0^\circ$, $|\text{pitch}| \le 3.0^\circ$) and target-line lock before enabling swing capture (`REQ-SYNC-001`, `REQ-SYNC-002`).
+- [x] Aligns `ball_strike` captures to $t = 0$ within $\pm 1.5\text{ ms}$ by subtracting acoustic time-of-flight $d_{\text{cam}}/c_{\text{air}}$, and aligns `dry_swing` captures via *Low Point* angular velocity correlation within $\pm 6.0\text{ ms}$ (`REQ-SYNC-003`, `REQ-SYNC-004`).
+- [x] Outputs validated `VideoSyncSession` payloads including `dtl_launch_window` (in `dtl` mode) and `pose_kinematics_summary` (`REQ-SYNC-005`, `REQ-SYNC-006`).
