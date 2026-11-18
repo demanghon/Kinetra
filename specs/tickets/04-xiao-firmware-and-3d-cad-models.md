@@ -4,8 +4,8 @@
 
 **Blocked by:** 01: Simulation Harness & JSON Schema Draft 2020-12 Contract Validator (`sim-harness`)
 
-**Status:** ready-for-agent
+**Status:** resolved
 
-- [ ] Implements the `Wake-on-Use` power state machine (`DEEP_SLEEP_UNMOUNTED`, `STANDBY_MOUNTED_IDLE`, `ACTIVE_BLE_READY`, `ADDRESS_LOCKED_1660HZ`, `BURST_TX_POST_SWING`, `USB_CHARGING_TELEMETRY`) with pulsed pull-up sampling on `D0..D3` (`REQ-IMU-007`, `REQ-IMU-008`).
-- [ ] Pins `BQ25101` charging current to $50\text{ mA}$ and broadcasts live battery voltage, percentage, charging phase, and `SWITCH_OFF_DURING_CHARGE_WARNING` (`REQ-IMU-009`).
-- [ ] Provides parametric 3D printable CAD models (`.scad`) for the sensor housing and the 14 non-destructive keyed mounts.
+- [x] Implements the `Wake-on-Use` power state machine (`DEEP_SLEEP_UNMOUNTED`, `STANDBY_MOUNTED_IDLE`, `ACTIVE_BLE_READY`, `ADDRESS_LOCKED_1660HZ`, `BURST_TX_POST_SWING`, `USB_CHARGING_TELEMETRY`) with pulsed pull-up sampling on `D0..D3` (`REQ-IMU-007`, `REQ-IMU-008`).
+- [x] Pins `BQ25101` charging current to $50\text{ mA}$ and broadcasts live battery voltage, percentage, charging phase, and `SWITCH_OFF_DURING_CHARGE_WARNING` (`REQ-IMU-009`).
+- [x] Provides parametric 3D printable CAD models (`.scad`) for the sensor housing and the 14 non-destructive keyed mounts.
