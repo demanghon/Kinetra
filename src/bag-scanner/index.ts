@@ -164,6 +164,7 @@ export function resolveClubProfileFromCatalog(input: {
   shaftMaterial: ShaftMaterial;
   flexRating: FlexRating;
   mountSlotId: number;
+  nominalFaceAlignmentOffsetDeg?: number;
 }): ClubProfilePayload {
   const {
     clubCategory,
@@ -174,6 +175,7 @@ export function resolveClubProfileFromCatalog(input: {
     shaftMaterial,
     flexRating,
     mountSlotId,
+    nominalFaceAlignmentOffsetDeg,
   } = input;
 
   const isDriver = clubCategory === "driver";
@@ -246,7 +248,7 @@ export function resolveClubProfileFromCatalog(input: {
       mount_slot_id: mountSlotId,
       gpio_binary_code_d3_d0: mountSlotIdToGpioBinary(mountSlotId),
       keyway_type: "ASYMMETRIC_D_LOCK_V1",
-      nominal_face_alignment_offset_deg: 0.0,
+      nominal_face_alignment_offset_deg: nominalFaceAlignmentOffsetDeg ?? 0.0,
     },
   };
 }
@@ -416,9 +418,25 @@ export class BagScannerSession {
     return this.currentEvent();
   }
 
-  public bindMountSlot(mountSlotId: number): BagScannerInteractiveEvent {
+  public bindMountSlot(
+    mountSlotId: number,
+    measuredAlignmentOffsetDeg = 0.0
+  ): BagScannerInteractiveEvent {
     this.detectedMountSlotId = mountSlotId;
+
+    // REQ-IMU-010 & REQ-BAG-006: Check if the newly glued mount is misaligned by more than ±12.0°
+    const roundedOffset = Math.round(measuredAlignmentOffsetDeg * 10) / 10;
+    if (Math.abs(roundedOffset) > 12.0) {
+      this.state = "WAIT_MOUNT_CLIP";
+      this.requiresUserConfirmation = true;
+      this.resolvedClubProfile = null;
+      const sideFr = roundedOffset > 0 ? "la droite" : "la gauche";
+      this.ttsUtteranceFr = `Attention, l'embase numéro ${mountSlotId} est décalée de ${Math.abs(roundedOffset).toFixed(1)} degrés vers ${sideFr}. Décollez-la maintenant et réalignez la flèche FACE avec le bord d'attaque du club.`;
+      return this.currentEvent();
+    }
+
     this.state = "RESOLVE_PHYSICS";
+    this.requiresUserConfirmation = false;
 
     this.resolvedClubProfile = resolveClubProfileFromCatalog({
       clubCategory: this.clubCategory ?? "iron",
@@ -429,14 +447,19 @@ export class BagScannerSession {
       shaftMaterial: this.shaftMaterial ?? "steel",
       flexRating: this.flexRating ?? "R",
       mountSlotId,
+      nominalFaceAlignmentOffsetDeg: roundedOffset,
     });
 
     this.state = "CLUB_SAVED";
     const matFr = this.shaftMaterial === "steel" ? "Acier" : "Graphite";
+    const offsetNote =
+      Math.abs(roundedOffset) > 0.05
+        ? ` (étalonnage d'alignement ${roundedOffset > 0 ? "+" : ""}${roundedOffset.toFixed(1)}° enregistré)`
+        : "";
     this.ttsUtteranceFr =
       this.scanMode === "SINGLE_CLUB_UPDATE"
-        ? `${this.clubLabel} ${this.brand} ${this.model} en ${matFr} ${this.flexRating} mis à jour sur l'embase numéro ${mountSlotId}.`
-        : `${this.clubLabel} ${this.brand} ${this.model} lié à l'embase numéro ${mountSlotId}. Passez au club suivant.`;
+        ? `${this.clubLabel} ${this.brand} ${this.model} en ${matFr} ${this.flexRating} mis à jour sur l'embase numéro ${mountSlotId}${offsetNote}.`
+        : `${this.clubLabel} ${this.brand} ${this.model} lié à l'embase numéro ${mountSlotId}${offsetNote}. Passez au club suivant.`;
 
     return this.currentEvent();
   }

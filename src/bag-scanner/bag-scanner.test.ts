@@ -60,13 +60,21 @@ describe("Ticket 07 — On-Device Vision & Local Neural TTS Bag Scanner + Single
     assert.equal(evt.extracted_attributes.flex_rating, "S");
     assert.match(evt.tts_utterance_fr, /Clipsez maintenant le capteur/i);
 
-    // 4. Clip GeoTrick sensor onto mount slot #7 -> resolves physics and saves ClubProfile
-    evt = scanner.bindMountSlot(7);
+    // 4a. Simulate badly glued mount (+22.5° > ±12° limit) -> alerts user to peel and re-align immediately!
+    evt = scanner.bindMountSlot(7, 22.5);
+    assert.equal(evt.current_state, "WAIT_MOUNT_CLIP");
+    assert.equal(evt.requires_user_confirmation, true);
+    assert.equal(evt.resolved_club_profile, null);
+    assert.match(evt.tts_utterance_fr, /décalée de 22\.5 degrés.*Décollez-la/i);
+
+    // 4b. Re-stick mount within hand tolerance (+3.2° <= ±12°) -> saves permanent offset +3.2° in ClubProfile!
+    evt = scanner.bindMountSlot(7, 3.2);
     assert.equal(evt.current_state, "CLUB_SAVED");
     assert.equal(evt.detected_mount_slot_id, 7);
     assert.ok(evt.resolved_club_profile !== null);
     assert.equal(evt.resolved_club_profile?.butt_cap_mount.mount_slot_id, 7);
     assert.equal(evt.resolved_club_profile?.butt_cap_mount.gpio_binary_code_d3_d0, "1000");
+    assert.equal(evt.resolved_club_profile?.butt_cap_mount.nominal_face_alignment_offset_deg, 3.2);
 
     const validation = registry.validate(
       "https://kinetra.golf/schemas/bag-scanner.schema.json",

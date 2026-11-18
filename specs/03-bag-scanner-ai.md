@@ -85,8 +85,8 @@ Le module `bag-scanner` enrichit automatiquement le profil avec les constantes m
 ### `REQ-BAG-005` — Enrichissement Mécanique Complet via `ClubPhysicsCatalog`
 > **When** les attributs d'un club sont validés, **the system shall** enrichir le `Club Profile` avec les paramètres mécaniques complets ($L_{\text{club}}$, $d_{\text{hands}}$, $m_{\text{head}}$, $\vec{e}_{\text{cg}}$, $EI_{\text{eff}}$, $GJ_{\text{eff}}$, $\kappa_{\text{aniso}}$) issus de `ClubPhysicsCatalog`.
 
-### `REQ-BAG-006` — Association Automatique `mount_slot_id` (`1..14`) par Clipsage du Capteur
-> **When** le capteur GeoTrick IMU est clipsé sur l'embase du club pendant ou au début du scan, **the system shall** lire le `mount_slot_id` ($\in [1..14]$) transmis en BLE et l'enregistrer dans `butt_cap_mount.mount_slot_id` du `Club Profile` afin que toute insertion ultérieure du capteur sur cette embase sélectionne ce club automatiquement.
+### `REQ-BAG-006` — Association Automatique `mount_slot_id` (`1..14`) & Étalonnage Gravitaire d'Alignement ($\le \pm 12^\circ$)
+> **When** le capteur GeoTrick IMU est clipsé sur l'embase du club pendant le scan et que le club est posé d'équerre au sol, **the system shall** lire le `mount_slot_id` ($\in [1..14]$) transmis en BLE, mesurer l'offset d'alignement axial de l'embase (`nominal_face_alignment_offset_deg`), alerter vocalement le joueur de recoller l'embase si $|\psi_{\text{offset}}| > 12.0^\circ$, ou enregistrer la compensation permanente si $|\psi_{\text{offset}}| \le 12.0^\circ$.
 
 ### `REQ-BAG-007` — Mise à Jour Unitaire d'un Club Après Coup (`SINGLE_CLUB_UPDATE`)
 > **When** l'utilisateur invoque le mode `SINGLE_CLUB_UPDATE` (ou clipse le capteur sur une embase et demande la modification de ce club), **the system shall** exécuter le flux d'assistance vocale et vidéo uniquement pour ce club et mettre à jour l'entrée correspondante du sac sans modifier ni rescanner les autres clubs enregistrés.

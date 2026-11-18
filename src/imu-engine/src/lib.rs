@@ -8,6 +8,7 @@ pub enum ImuEngineError {
     MountNotLocked,
     InvalidMountSlot(u8),
     AddressTareUnstable,
+    MountMisalignedRepositionRequired { measured_offset_deg_x10: i32 },
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -334,6 +335,43 @@ pub fn compute_address_pose_tare(
         tare_quaternion_wxyz,
         residual_face_tare_deg: nominal_face_alignment_offset_deg,
     })
+}
+
+/// Calibrates the permanent axial alignment offset (`nominal_face_alignment_offset_deg`) of a newly
+/// glued `Keyed Butt-Cap Mount` when the club is rested square on the ground/reference surface (`REQ-IMU-010`).
+/// - If `|offset_deg| <= 12.0°`, returns `Ok(offset_deg)` to be stored permanently in the `ClubProfile`.
+/// - If `|offset_deg| > 12.0°`, returns `Err(ImuEngineError::MountMisalignedRepositionRequired)` so the golfer
+///   can peel and re-stick the 3M VHB pad immediately before it cures.
+pub fn calibrate_mount_alignment_offset(
+    accel_g_xyz: [f64; 3],
+    gyro_dps_xyz: [f64; 3],
+    expected_gravity_xy_angle_deg: f64,
+) -> Result<f64, ImuEngineError> {
+    let gyro_norm =
+        (gyro_dps_xyz[0].powi(2) + gyro_dps_xyz[1].powi(2) + gyro_dps_xyz[2].powi(2)).sqrt();
+    let accel_norm =
+        (accel_g_xyz[0].powi(2) + accel_g_xyz[1].powi(2) + accel_g_xyz[2].powi(2)).sqrt();
+    if gyro_norm >= 2.0 || (accel_norm - 1.0).abs() >= 0.05 {
+        return Err(ImuEngineError::AddressTareUnstable);
+    }
+
+    let measured_xy_deg = accel_g_xyz[1].atan2(accel_g_xyz[0]).to_degrees();
+    let mut delta_deg = measured_xy_deg - expected_gravity_xy_angle_deg;
+    while delta_deg > 180.0 {
+        delta_deg -= 360.0;
+    }
+    while delta_deg < -180.0 {
+        delta_deg += 360.0;
+    }
+
+    let rounded_offset_deg = (delta_deg * 10.0).round() / 10.0;
+    if rounded_offset_deg.abs() > 12.0 {
+        return Err(ImuEngineError::MountMisalignedRepositionRequired {
+            measured_offset_deg_x10: (rounded_offset_deg * 10.0).round() as i32,
+        });
+    }
+
+    Ok(rounded_offset_deg)
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -751,6 +789,28 @@ mod tests {
         assert_eq!(
             compute_address_pose_tare(&steady_samples[1..], 0.0),
             Err(ImuEngineError::AddressTareUnstable)
+        );
+
+        // REQ-IMU-010: Gravity mount alignment calibration (<= ±12° accepted, > ±12° rejected for re-sticking)
+        let angle_rad = (-86.8_f64).to_radians(); // +3.2° offset from -90.0° reference
+        let offset_ok = calibrate_mount_alignment_offset(
+            [0.50 * angle_rad.cos(), 0.50 * angle_rad.sin(), -0.866],
+            [0.1, -0.1, 0.0],
+            -90.0,
+        )
+        .expect("3.2° offset should be auto-compensated");
+        assert!((offset_ok - 3.2).abs() <= 0.1);
+
+        let bad_angle_rad = (-65.0_f64).to_radians(); // +25.0° gross misplacement
+        assert_eq!(
+            calibrate_mount_alignment_offset(
+                [0.50 * bad_angle_rad.cos(), 0.50 * bad_angle_rad.sin(), -0.866],
+                [0.1, 0.0, 0.0],
+                -90.0,
+            ),
+            Err(ImuEngineError::MountMisalignedRepositionRequired {
+                measured_offset_deg_x10: 250
+            })
         );
     }
 
